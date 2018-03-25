@@ -8,37 +8,42 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\TrezorProto\MessageType;
+use GuzzleHttp\Client as GuzzleClient;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
 {
     /**
-     * @var \GuzzleHttp\Client
+     * @var GuzzleClient
      */
     private $client;
 
     /**
+     * Base headers to use when the request is
+     * simple JSON
+     *
      * @var array
      */
-    private $jsonHeaders = [];
+    private $jsonHeaders = [
+        'Accept' => 'application/json',
+    ];
 
     /**
+     * Encoder for serializing the call payload & response
+     *
      * @var CallMessage\HexCodec
      */
     private $callCodec;
 
-    public function __construct(\GuzzleHttp\Client $client)
+    public function __construct(GuzzleClient $client)
     {
         $this->client = $client;
-        $this->jsonHeaders = [
-            'Accept' => 'application/json',
-        ];
         $this->callCodec = new CallMessage\HexCodec();
     }
 
-    public static function forUri(string $uri)
+    public static function forUri(string $uri): self
     {
-        return new self(new \GuzzleHttp\Client([
+        return new self(new GuzzleClient([
             'base_uri' => $uri,
             'headers' => [
                 'Origin' => 'http://localhost:5000',
@@ -87,17 +92,24 @@ class HttpClient
 
     public function call(string $sessionId, Message $message): Message
     {
-        $result = $this->client->post("/call/{$sessionId}", [
+        static $prefixLen;
+        if (null === $prefixLen) {
+            $prefixLen = strlen("MessageType_");
+        }
+
+        $response = $this->client->post("/call/{$sessionId}", [
             'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
         ]);
 
         list ($type, $result) = $this->callCodec->parsePayload(
-            $this->callCodec->convertHexPayloadToBinary($result->getBody())
+            $this->callCodec->convertHexPayloadToBinary($response->getBody())
         );
 
         $messageType = MessageType::valueOf($type);
-        $protoType = substr($messageType->name(), strlen("MessageType_"));
+        $protoType = substr($messageType->name(), $prefixLen);
         $reader = ["\\BitWasp\\TrezorProto\\{$protoType}", 'fromStream'];
+        assert(class_exists($reader[0]));
+
         $protobuf = call_user_func($reader, $result);
         return new Message($messageType, $protobuf);
     }

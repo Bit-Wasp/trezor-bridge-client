@@ -9,20 +9,15 @@ use Psr\Http\Message\StreamInterface;
 
 class HexCodec
 {
-
-    /**
-     * @param string $string
-     * @return resource
-     */
-    private function stringToStream(string $string)
+    private function stringToStream(string $stringToConvert)
     {
         $stream = fopen('php://memory', 'w+');
         if (!is_resource($stream)) {
             throw new \RuntimeException("Failed to create stream");
         }
 
-        $wrote = fwrite($stream, $string);
-        if ($wrote !== strlen($string)) {
+        $wrote = fwrite($stream, $stringToConvert);
+        if ($wrote !== strlen($stringToConvert)) {
             throw new \RuntimeException("Failed to write to stream");
         }
 
@@ -41,10 +36,10 @@ class HexCodec
 
     public function parsePayload(StreamInterface $stream): array
     {
-        $type = unpack('n', $stream->read(2))[1];
+        list ($type) = array_values(unpack('n', $stream->read(2)));
         $stream->seek(2);
 
-        $size = unpack('N', $stream->read(4))[1];
+        list ($size) = array_values(unpack('N', $stream->read(4)));
         $stream->seek(6);
 
         if ($size > ($stream->getSize() - 6)) {
@@ -57,6 +52,13 @@ class HexCodec
     public function encode(int $messageType, \Protobuf\Message $protobuf): string
     {
         $stream = $protobuf->toStream();
-        return unpack('H*', pack('n', $messageType) . pack('N', $stream->getSize()) . $stream->getContents())[1];
+        return unpack(
+            'H*',
+            sprintf(
+                "%s%s",
+                pack('nN', $messageType, $stream->getSize()),
+                $stream->getContents()
+            )
+        )[1];
     }
 }

@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Bridge\Message;
 
+/**
+ * Properties via magic
+ * @property int $path
+ * @property string|null $session
+ * @property int|null $vendor
+ * @property int|null $product
+ */
 class Device
 {
     /**
-     * @var \stdClass - hid path for device
+     * Device object to by wrapped
+     *
+     * @var \stdClass
      */
     private $msg;
 
-    /**
-     * Device constructor.
-     * @param string $path
-     * @param string|null $session
-     * @param int|null $vendor
-     * @param int|null $product
-     */
     public function __construct(\stdClass $device)
     {
         $this->msg = $device;
@@ -33,16 +35,25 @@ class Device
         return $this->msg->path;
     }
 
+    /**
+     * @return string|null
+     */
     public function getSession()
     {
         return $this->msg->session;
     }
 
+    /**
+     * @return int|null
+     */
     public function getVendor()
     {
         return $this->msg->vendor;
     }
 
+    /**
+     * @return int|null
+     */
     public function getProduct()
     {
         return $this->msg->product;
