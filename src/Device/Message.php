@@ -12,6 +12,7 @@ use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\SignMessage;
+use BitWasp\TrezorProto\VerifyMessage;
 
 class Message
 {
@@ -99,6 +100,14 @@ class Message
         return new self(
             MessageType::MessageType_SignMessage_VALUE,
             $signMessage
+        );
+    }
+
+    public static function verifyMessage(VerifyMessage $verifyMsg): self
+    {
+        return new self(
+            MessageType::MessageType_VerifyMessage_VALUE,
+            $verifyMsg
         );
     }
 }

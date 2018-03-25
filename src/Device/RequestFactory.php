@@ -10,6 +10,7 @@ use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\InputScriptType;
 use BitWasp\TrezorProto\SignMessage;
+use BitWasp\TrezorProto\VerifyMessage;
 
 class RequestFactory
 {
@@ -66,6 +67,15 @@ class RequestFactory
         return $this->getAddress($coinName, $path, InputScriptType::SPENDP2SHWITNESS(), $showDisplay);
     }
 
+    public function verifyMessage(string $coinName, string $address, string $signature, string $message): VerifyMessage
+    {
+        $verifyMsg = new VerifyMessage();
+        $verifyMsg->setCoinName($coinName);
+        $verifyMsg->setAddress($address);
+        $verifyMsg->setSignature(\Protobuf\Stream::fromString($signature));
+        $verifyMsg->setMessage(\Protobuf\Stream::fromString($message));
+        return $verifyMsg;
+    }
     public function rawSignMessage(string $coinName, array $path, InputScriptType $inScriptType, string $message): SignMessage
     {
         $signMessage = new SignMessage();

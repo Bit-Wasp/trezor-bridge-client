@@ -74,7 +74,7 @@ class Session
         $message = $this->client->call($this->getSessionId(), $message);
         $proto = $message->getProto();
         if ($proto instanceof Failure) {
-            throw new CommandFailureException($proto);
+            CommandFailureException::handleFailure($proto);
         }
 
         return $message;
