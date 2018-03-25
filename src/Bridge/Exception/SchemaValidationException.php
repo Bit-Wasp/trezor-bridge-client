@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor\Exception;
+namespace BitWasp\Trezor\Bridge\Exception;
 
-class SchemaValidationException extends TrezorException
+class SchemaValidationException extends BridgeException
 {
     private $errors = [];
 

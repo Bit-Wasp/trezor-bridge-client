@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor;
+namespace BitWasp\Trezor\Device;
 
+use BitWasp\Trezor\Bridge\Session;
 use BitWasp\TrezorProto;
-use GuzzleHttp\Psr7\Stream;
-use Protobuf\Message;
-use Psr\Http\Message\StreamInterface;
 
-class DeviceClient
+class Client
 {
     /**
      * @var Session
@@ -22,78 +20,29 @@ class DeviceClient
     }
 
     /**
-     * @param string $string
-     * @return resource
-     */
-    private function stringToStream(string $string)
-    {
-        $stream = fopen('php://memory', 'w+');
-        if (!is_resource($stream)) {
-            throw new \RuntimeException("Failed to create stream");
-        }
-
-        $wrote = fwrite($stream, $string);
-        if ($wrote !== strlen($string)) {
-            throw new \RuntimeException("Failed to write to stream");
-        }
-
-        rewind($stream);
-        return $stream;
-    }
-
-    public function convertHexPayloadToBinary(StreamInterface $hexStream): StreamInterface
-    {
-        if ($hexStream->getSize() < 12) {
-            throw new \Exception("Malformed data (size too small)");
-        }
-
-        return new Stream($this->stringToStream(pack("H*", $hexStream->getContents())));
-    }
-
-    public function parsePayload(StreamInterface $stream): array
-    {
-        $type = unpack('n', $stream->read(2))[1];
-        $stream->seek(2);
-
-        $size = unpack('N', $stream->read(4))[1];
-        $stream->seek(6);
-
-        if ($size > ($stream->getSize() - 6)) {
-            throw new \Exception("Malformed data (sent more than size)");
-        }
-
-        return [$type, $this->stringToStream($stream->read($size))];
-    }
-
-    /**
-     * @param int $messageType
      * @param Message $message
-     * @return array
+     * @return Message
      * @throws \Exception
      */
-    public function sendDeviceMessage(int $messageType, Message $message)
+    public function sendDeviceMessage(Message $message)
     {
-        $result = $this->session->sendMessage($messageType, $message);
-
-        return $this->parsePayload(
-            $this->convertHexPayloadToBinary($result->getBody())
-        );
+        return $this->session->sendMessage($message);
     }
 
     public function getFeatures(): TrezorProto\Features
     {
         $getFeatures = new TrezorProto\GetFeatures();
 
-        list ($type, $result) = $this->sendDeviceMessage(
+        $response = $this->sendDeviceMessage(
             TrezorProto\MessageType::MessageType_GetFeatures_VALUE,
             $getFeatures
         );
 
-        if (TrezorProto\MessageType::MessageType_GetFeatures_VALUE !== $type) {
+        if (!$response->isType(TrezorProto\MessageType::MessageType_Features_VALUE)) {
             throw new \Exception("Invalid message returned");
         }
 
-        return TrezorProto\Features::fromStream($result);
+        return $response->getProto();
     }
 
     public function buttonAck()
@@ -211,16 +160,19 @@ class DeviceClient
     }
 
     /**
-     * @return TrezorProto\Features|\Protobuf\Message
+     * @return TrezorProto\Features
      * @throws \Exception
      */
-    public function initialize()
+    public function initialize(): TrezorProto\Features
     {
-        list ($type, $result) = $this->sendDeviceMessage(
-            TrezorProto\MessageType::MessageType_Initialize_VALUE,
-            new TrezorProto\Initialize()
+        $message = $this->sendDeviceMessage(
+            new Message(TrezorProto\MessageType::MessageType_Initialize_VALUE, new TrezorProto\Initialize())
         );
 
-        return TrezorProto\Features::fromStream($result);
+        if (!$message->isType(TrezorProto\MessageType::MessageType_Features_VALUE)) {
+            throw new \RuntimeException("Unexpected response");
+        }
+
+        return $message->getProto();
     }
 }

@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor;
+namespace BitWasp\Trezor\Bridge;
 
-use BitWasp\Trezor\Exception\InvalidMessageException;
-use BitWasp\Trezor\Exception\SchemaValidationException;
-use BitWasp\Trezor\Message\Device;
-use BitWasp\Trezor\Message\ListDevicesResponse;
-use BitWasp\Trezor\Message\VersionResponse;
-use BitWasp\Trezor\Schema\ValidatorFactory;
-use Protobuf\Message;
+use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
+use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
+use BitWasp\Trezor\Bridge\Message\Device;
+use BitWasp\Trezor\Bridge\Message\ListDevicesResponse;
+use BitWasp\Trezor\Bridge\Message\VersionResponse;
+use BitWasp\Trezor\Bridge\Schema\ValidatorFactory;
+use BitWasp\Trezor\Bridge\Http\HttpClient;
+use BitWasp\Trezor\Device\Message;
 use Psr\Http\Message\ResponseInterface;
 
-class TrezorBridgeClient
+class Client
 {
     /**
      * @var HttpClient
@@ -34,6 +35,16 @@ class TrezorBridgeClient
         $this->client = $client;
         $this->validation = new ValidatorFactory();
     }
+
+    /**
+     * @param string $uri
+     * @return Client
+     */
+    public static function fromUri(string $uri)
+    {
+        return new self(HttpClient::forUri($uri));
+    }
+
 
     /**
      * @param \Psr\Http\Message\StreamInterface $body
@@ -75,6 +86,9 @@ class TrezorBridgeClient
         return $result;
     }
 
+    /**
+     * @return VersionResponse
+     */
     public function bridgeVersion(): VersionResponse
     {
         $result = $this->processResponse(
@@ -122,18 +136,18 @@ class TrezorBridgeClient
         return new Session($this, $device, $result->session);
     }
 
-    public function release(string $sessionId)
+    public function release(string $sessionId): bool
     {
-        $result = $this->processResponse(
+        $this->processResponse(
             $this->client->release($sessionId),
             $this->validation->releaseResponse()
         );
 
-        return $result;
+        return true;
     }
 
-    public function call(string $sessionId, int $messageType, Message $message)
+    public function call(string $sessionId, Message $message): Message
     {
-        return $this->client->call($sessionId, $messageType, $message);
+        return $this->client->call($sessionId, $message);
     }
 }

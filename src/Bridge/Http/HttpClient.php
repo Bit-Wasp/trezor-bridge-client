@@ -2,22 +2,38 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor;
+namespace BitWasp\Trezor\Bridge\Http;
 
-use BitWasp\Trezor\Message\Device;
-use Protobuf\Message;
+use BitWasp\Trezor\Bridge\Codec\CallMessage;
+use BitWasp\Trezor\Bridge\Message\Device;
+use BitWasp\Trezor\Device\Message;
+use BitWasp\TrezorProto\MessageType;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
 {
+    /**
+     * @var \GuzzleHttp\Client
+     */
     private $client;
+
+    /**
+     * @var array
+     */
     private $jsonHeaders = [];
+
+    /**
+     * @var CallMessage\HexCodec
+     */
+    private $callCodec;
+
     public function __construct(\GuzzleHttp\Client $client)
     {
         $this->client = $client;
         $this->jsonHeaders = [
             'Accept' => 'application/json',
         ];
+        $this->callCodec = new CallMessage\HexCodec();
     }
 
     public static function forUri(string $uri)
@@ -69,12 +85,20 @@ class HttpClient
         ]);
     }
 
-    public function call(string $sessionId, int $messageType, Message $message): ResponseInterface
+    public function call(string $sessionId, Message $message): Message
     {
-        $stream = $message->toStream();
-        $payload = unpack('H*', pack('n', $messageType) . pack('N', $stream->getSize()) . $stream->getContents())[1];
-        return $this->client->post("/call/{$sessionId}", [
-            'body' => $payload,
+        $result = $this->client->post("/call/{$sessionId}", [
+            'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
         ]);
+
+        list ($type, $result) = $this->callCodec->parsePayload(
+            $this->callCodec->convertHexPayloadToBinary($result->getBody())
+        );
+
+        $messageType = MessageType::valueOf($type)->name();
+        $protoType = substr($messageType, strlen("MessageType_"));
+        $reader = ["\\BitWasp\\TrezorProto\\{$protoType}", 'fromStream'];
+        $protobuf = call_user_func($reader, $result);
+        return new Message($type, $protobuf);
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor\Schema;
+namespace BitWasp\Trezor\Bridge\Schema;
 
 class ValidatorFactory
 {

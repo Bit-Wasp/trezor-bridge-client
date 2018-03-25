@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor;
+namespace BitWasp\Trezor\Bridge;
 
-use BitWasp\Trezor\Exception\InactiveSessionException;
-use BitWasp\Trezor\Message\Device;
-use Protobuf\Message;
+use BitWasp\Trezor\Bridge\Exception\InactiveSessionException;
+use BitWasp\Trezor\Bridge\Message\Device;
+use BitWasp\Trezor\Device\Exception\CommandFailureException;
+use BitWasp\Trezor\Device\Message;
+use BitWasp\TrezorProto\Failure;
 
 class Session
 {
     /**
-     * @var TrezorBridgeClient
+     * @var Client
      */
     private $client;
 
@@ -30,7 +32,7 @@ class Session
      */
     private $active = true;
 
-    public function __construct(TrezorBridgeClient $client, Device $device, string $sessionId)
+    public function __construct(Client $client, Device $device, string $sessionId)
     {
         $this->client = $client;
         $this->device = $device;
@@ -67,12 +69,14 @@ class Session
         return $this->device;
     }
 
-    public function sendMessage(int $messageType, Message $protobuf)
+    public function sendMessage(Message $message): Message
     {
-        return $this->client->call(
-            $this->getSessionId(),
-            $messageType,
-            $protobuf
-        );
+        $message = $this->client->call($this->getSessionId(), $message);
+        $proto = $message->getProto();
+        if ($proto instanceof Failure) {
+            throw new CommandFailureException($proto->getMessage(), $proto->getCode());
+        }
+
+        return $message;
     }
 }

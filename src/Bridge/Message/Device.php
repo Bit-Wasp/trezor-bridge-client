@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace BitWasp\Trezor\Message;
+namespace BitWasp\Trezor\Bridge\Message;
 
 class Device
 {
