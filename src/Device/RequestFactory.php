@@ -9,6 +9,7 @@ use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\InputScriptType;
+use BitWasp\TrezorProto\SignMessage;
 
 class RequestFactory
 {
@@ -65,5 +66,20 @@ class RequestFactory
         return $this->getAddress($coinName, $path, InputScriptType::SPENDP2SHWITNESS(), $showDisplay);
     }
 
+    public function rawSignMessage(string $coinName, array $path, InputScriptType $inScriptType, string $message): SignMessage
+    {
+        $signMessage = new SignMessage();
+        $signMessage->setCoinName($coinName);
+        foreach ($path as $sequence) {
+            $signMessage->addAddressN($sequence);
+        }
+        $signMessage->setScriptType($inScriptType);
+        $signMessage->setMessage(\Protobuf\Stream::fromString($message));
+        return $signMessage;
+    }
 
+    public function signMessagePubKeyHash(string $coinName, array $path, string $message): SignMessage
+    {
+        return $this->rawSignMessage($coinName, $path, InputScriptType::SPENDADDRESS(), $message);
+    }
 }

@@ -11,6 +11,7 @@ use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PinMatrixAck;
+use BitWasp\TrezorProto\SignMessage;
 
 class Message
 {
@@ -90,6 +91,14 @@ class Message
         return new self(
             MessageType::MessageType_ButtonAck_VALUE,
             $ack
+        );
+    }
+
+    public static function signMessage(SignMessage $signMessage): self
+    {
+        return new self(
+            MessageType::MessageType_SignMessage_VALUE,
+            $signMessage
         );
     }
 }

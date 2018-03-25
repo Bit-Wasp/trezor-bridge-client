@@ -27,7 +27,7 @@ class GetAddressService extends DeviceService
         }
 
         if ($getAddress->getShowDisplay()) {
-            while($proto instanceof ButtonRequest) {
+            while ($proto instanceof ButtonRequest) {
                 $message = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Address_VALUE));
                 $proto = $message->getProto();
             }

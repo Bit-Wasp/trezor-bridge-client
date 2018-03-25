@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-use BitWasp\Trezor\Device\Command\GetAddressService;
 use BitWasp\Trezor\Device\Command\InitializeService;
+use BitWasp\Trezor\Device\Command\SignMessageService;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\CoinType;
 
 require "vendor/autoload.php";
 
-$hardened = pow(2, 31)-1;
 $useNetwork = "BTC";
-
 $trezor = \BitWasp\Trezor\Bridge\Client::fromUri("http://localhost:21325");
 
+$hardened = pow(2, 31)-1;
 echo "list devices\n";
 $devices = $trezor->listDevices();
 if (empty($devices)) {
@@ -49,14 +48,16 @@ if (!$btcNetwork) {
     throw new \RuntimeException("Failed to find requested network ({$useNetwork})");
 }
 
+$toSign = "this is my message!";
+
 $currentPinInput = new CurrentPinInput();
-$addressService = new GetAddressService();
+$signMessageService = new SignMessageService();
+
 $bip44Account1 = [44 | $hardened, 0 | $hardened, 0 | $hardened];
 $address0 = array_merge($bip44Account1, [0, 0]);
 
-$getAddress = $reqFactory->getKeyHashAddress($btcNetwork->getCoinName(), $address0, false);
-$address = $addressService->call($session, $currentPinInput, $getAddress);
+$signMessage = $reqFactory->signMessagePubKeyHash($btcNetwork->getCoinName(), [1], $toSign);
 
-var_dump($address);
+$signedMessage = $signMessageService->call($session, $currentPinInput, $signMessage);
 
 $session->release();
