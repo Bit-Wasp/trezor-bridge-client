@@ -1,15 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BitWasp\Trezor\Device;
 
+use BitWasp\TrezorProto\GetAddress;
+use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
+use BitWasp\TrezorProto\InputScriptType;
 
 class RequestFactory
 {
     public function initialize(): Initialize
     {
         return new Initialize();
+    }
+
+    public function getEntropy(int $bytes): GetEntropy
+    {
+        $getEntropy = new GetEntropy();
+        $getEntropy->setSize($bytes);
+        return $getEntropy;
     }
 
     public function getPublicKey(string $coinName, array $path, string $curveName = null): GetPublicKey
@@ -24,4 +36,34 @@ class RequestFactory
         }
         return $getPublicKey;
     }
+
+    public function getAddress(string $coinName, array $path, InputScriptType $inScriptType, bool $showDisplay): GetAddress
+    {
+        $getAddress = new GetAddress();
+        $getAddress->setCoinName($coinName);
+        foreach ($path as $sequence) {
+            $getAddress->addAddressN($sequence);
+        }
+        $getAddress->setShowDisplay($showDisplay);
+        $getAddress->setScriptType($inScriptType);
+
+        return $getAddress;
+    }
+
+    public function getKeyHashAddress(string $coinName, array $path, bool $showDisplay): GetAddress
+    {
+        return $this->getAddress($coinName, $path, InputScriptType::SPENDADDRESS(), $showDisplay);
+    }
+
+    public function getWitnessKeyHashAddress(string $coinName, array $path, bool $showDisplay): GetAddress
+    {
+        return $this->getAddress($coinName, $path, InputScriptType::SPENDWITNESS(), $showDisplay);
+    }
+
+    public function getP2shWitnessKeyHashAddress(string $coinName, array $path, bool $showDisplay): GetAddress
+    {
+        return $this->getAddress($coinName, $path, InputScriptType::SPENDP2SHWITNESS(), $showDisplay);
+    }
+
+
 }

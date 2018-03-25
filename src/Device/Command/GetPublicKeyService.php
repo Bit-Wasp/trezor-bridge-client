@@ -9,9 +9,7 @@ use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\MessageType;
-use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\PinMatrixRequest;
-use BitWasp\TrezorProto\PinMatrixRequestType;
 use BitWasp\TrezorProto\PublicKey;
 
 class GetPublicKeyService extends DeviceService
@@ -22,12 +20,7 @@ class GetPublicKeyService extends DeviceService
         $proto = $message->getProto();
 
         if ($proto instanceof PinMatrixRequest) {
-            $this->checkPinRequestType($proto, PinMatrixRequestType::PinMatrixRequestType_Current_VALUE);
-
-            $pinMatrixAck = new PinMatrixAck();
-            $pinMatrixAck->setPin($currentPinInput->getPin());
-
-            $message = $session->sendMessage(Message::pinMatrixAck($pinMatrixAck));
+            $message = $session->sendMessage($this->provideCurrentPin($proto, $currentPinInput));
         }
 
         $this->checkResponseType($message, MessageType::MessageType_PublicKey_VALUE);

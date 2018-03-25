@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Device;
 
+use BitWasp\TrezorProto\ButtonAck;
+use BitWasp\TrezorProto\GetAddress;
+use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\MessageType;
@@ -50,6 +53,22 @@ class Message
         );
     }
 
+    public static function getAddress(GetAddress $getAddress): self
+    {
+        return new self(
+            MessageType::MessageType_GetAddress_VALUE,
+            $getAddress
+        );
+    }
+
+    public static function getEntropy(GetEntropy $getEntropy): self
+    {
+        return new self(
+            MessageType::MessageType_GetEntropy_VALUE,
+            $getEntropy
+        );
+    }
+
     public static function pinMatrixAck(PinMatrixAck $pinAck): self
     {
         return new self(
@@ -63,6 +82,14 @@ class Message
         return new self(
             MessageType::MessageType_Initialize_VALUE,
             $initialize
+        );
+    }
+
+    public static function buttonAck(ButtonAck $ack): self
+    {
+        return new self(
+            MessageType::MessageType_ButtonAck_VALUE,
+            $ack
         );
     }
 }
