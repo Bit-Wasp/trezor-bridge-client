@@ -6,6 +6,7 @@ use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\VerifyMessageService;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
+use BitWasp\Trezor\Device\Util;
 use BitWasp\TrezorProto\CoinType;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -32,15 +33,7 @@ $reqFactory = new RequestFactory();
 $initializeCmd = new InitializeService();
 $features = $initializeCmd->call($session, $reqFactory->initialize());
 
-$btcNetwork = null;
-foreach ($features->getCoinsList() as $coin) {
-    /** @var CoinType $coin */
-    if ($coin->getCoinShortcut() === $useNetwork) {
-        $btcNetwork = $coin;
-    }
-}
-
-if (!$btcNetwork) {
+if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
     throw new \RuntimeException("Failed to find requested network ({$useNetwork})");
 }
 

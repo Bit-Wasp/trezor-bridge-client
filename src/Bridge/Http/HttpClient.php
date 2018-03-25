@@ -95,10 +95,10 @@ class HttpClient
             $this->callCodec->convertHexPayloadToBinary($result->getBody())
         );
 
-        $messageType = MessageType::valueOf($type)->name();
-        $protoType = substr($messageType, strlen("MessageType_"));
+        $messageType = MessageType::valueOf($type);
+        $protoType = substr($messageType->name(), strlen("MessageType_"));
         $reader = ["\\BitWasp\\TrezorProto\\{$protoType}", 'fromStream'];
         $protobuf = call_user_func($reader, $result);
-        return new Message($type, $protobuf);
+        return new Message($messageType, $protobuf);
     }
 }

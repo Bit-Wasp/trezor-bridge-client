@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Device;
 
 use BitWasp\TrezorProto\ButtonAck;
+use BitWasp\TrezorProto\ClearSession;
 use BitWasp\TrezorProto\GetAddress;
 use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
@@ -19,7 +20,7 @@ use BitWasp\TrezorProto\VerifyMessage;
 class Message
 {
     /**
-     * @var int
+     * @var MessageType
      */
     private $type;
 
@@ -28,7 +29,7 @@ class Message
      */
     private $proto;
 
-    public function __construct(int $messageType, \Protobuf\Message $protobuf)
+    public function __construct(MessageType $messageType, \Protobuf\Message $protobuf)
     {
         $this->type = $messageType;
         $this->proto = $protobuf;
@@ -41,7 +42,7 @@ class Message
 
     public function getType(): int
     {
-        return $this->type;
+        return $this->type->value();
     }
 
     public function getProto(): \Protobuf\Message
@@ -52,7 +53,7 @@ class Message
     public static function getPublicKey(GetPublicKey $getPublicKey): self
     {
         return new self(
-            MessageType::MessageType_GetPublicKey_VALUE,
+            MessageType::MessageType_GetPublicKey(),
             $getPublicKey
         );
     }
@@ -60,7 +61,7 @@ class Message
     public static function getAddress(GetAddress $getAddress): self
     {
         return new self(
-            MessageType::MessageType_GetAddress_VALUE,
+            MessageType::MessageType_GetAddress(),
             $getAddress
         );
     }
@@ -68,7 +69,7 @@ class Message
     public static function getEntropy(GetEntropy $getEntropy): self
     {
         return new self(
-            MessageType::MessageType_GetEntropy_VALUE,
+            MessageType::MessageType_GetEntropy(),
             $getEntropy
         );
     }
@@ -76,7 +77,7 @@ class Message
     public static function pinMatrixAck(PinMatrixAck $pinAck): self
     {
         return new self(
-            MessageType::MessageType_PinMatrixAck_VALUE,
+            MessageType::MessageType_PinMatrixAck(),
             $pinAck
         );
     }
@@ -84,7 +85,7 @@ class Message
     public static function passphraseAck(PassphraseAck $passphraseAck): self
     {
         return new self(
-            MessageType::MessageType_PassphraseAck_VALUE,
+            MessageType::MessageType_PassphraseAck(),
             $passphraseAck
         );
     }
@@ -92,7 +93,7 @@ class Message
     public static function initialize(Initialize $initialize): self
     {
         return new self(
-            MessageType::MessageType_Initialize_VALUE,
+            MessageType::MessageType_Initialize(),
             $initialize
         );
     }
@@ -100,7 +101,7 @@ class Message
     public static function buttonAck(ButtonAck $ack): self
     {
         return new self(
-            MessageType::MessageType_ButtonAck_VALUE,
+            MessageType::MessageType_ButtonAck(),
             $ack
         );
     }
@@ -108,7 +109,7 @@ class Message
     public static function signMessage(SignMessage $signMessage): self
     {
         return new self(
-            MessageType::MessageType_SignMessage_VALUE,
+            MessageType::MessageType_SignMessage(),
             $signMessage
         );
     }
@@ -116,7 +117,7 @@ class Message
     public static function verifyMessage(VerifyMessage $verifyMsg): self
     {
         return new self(
-            MessageType::MessageType_VerifyMessage_VALUE,
+            MessageType::MessageType_VerifyMessage(),
             $verifyMsg
         );
     }
@@ -124,8 +125,16 @@ class Message
     public static function ping(Ping $ping): self
     {
         return new self(
-            MessageType::MessageType_Ping_VALUE,
+            MessageType::MessageType_Ping(),
             $ping
+        );
+    }
+
+    public static function clearSession(ClearSession $clear): self
+    {
+        return new self(
+            MessageType::MessageType_ClearSession(),
+            $clear
         );
     }
 }

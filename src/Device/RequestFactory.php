@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Device;
 
+use BitWasp\TrezorProto\ClearSession;
 use BitWasp\TrezorProto\GetAddress;
 use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
@@ -77,6 +78,7 @@ class RequestFactory
         $verifyMsg->setMessage(\Protobuf\Stream::fromString($message));
         return $verifyMsg;
     }
+
     public function rawSignMessage(string $coinName, array $path, InputScriptType $inScriptType, string $message): SignMessage
     {
         $signMessage = new SignMessage();
@@ -102,5 +104,10 @@ class RequestFactory
         $ping->setPinProtection($hasPinProtect);
         $ping->setPassphraseProtection($hasPasswordProtect);
         return $ping;
+    }
+
+    public function clearSession(): ClearSession
+    {
+        return new ClearSession();
     }
 }

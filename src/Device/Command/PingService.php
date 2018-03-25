@@ -23,8 +23,7 @@ class PingService extends DeviceService
         Ping $ping,
         CurrentPinInputInterface $pinInput = null,
         CurrentPassphraseInputInterface $passphraseInput = null
-    ): Success
-    {
+    ): Success {
         $proto = $session->sendMessage(Message::ping($ping));
 
         if ($proto instanceof ButtonRequest) {

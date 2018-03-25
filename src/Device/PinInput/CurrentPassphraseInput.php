@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Device\PinInput;
 
-
 class CurrentPassphraseInput implements CurrentPassphraseInputInterface
 {
     public function getPassphrase(): string
