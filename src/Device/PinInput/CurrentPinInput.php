@@ -6,10 +6,10 @@ namespace BitWasp\Trezor\Device\PinInput;
 
 class CurrentPinInput implements CurrentPinInputInterface
 {
-    public function getPin(): int
+    public function getPin(): string
     {
         echo "It's your safe and trusted pin entry!\n";
         echo "Enter your pin to proceed: ";
-        return (int) trim(fgets(STDIN));
+        return trim(fgets(STDIN));
     }
 }

@@ -6,5 +6,5 @@ namespace BitWasp\Trezor\Device\PinInput;
 
 interface CurrentPinInputInterface
 {
-    public function getPin(): int;
+    public function getPin(): string;
 }

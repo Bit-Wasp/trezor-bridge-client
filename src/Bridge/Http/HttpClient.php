@@ -77,7 +77,12 @@ class HttpClient
 
     public function acquire(Device $device): ResponseInterface
     {
-        $prevSession = $device->getSession() ?: "null";
+        if ($device->getSession()) {
+            $prevSession = $device->getSession();
+        } else {
+            $prevSession = "null";
+        }
+
         return $this->client->post("/acquire/{$device->getPath()}/{$prevSession}", [
             'headers' => $this->jsonHeaders,
         ]);

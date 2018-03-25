@@ -27,7 +27,7 @@ class Device
 
     public function __get($name)
     {
-        return $this->msg->$$name;
+        return $this->msg->{$name};
     }
 
     public function getPath(): string

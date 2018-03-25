@@ -1,0 +1,27 @@
+language: php
+
+php:
+ - 7.0
+ - 7.1
+ - 7.2
+ - nightly
+
+env:
+  matrix:
+    - PHPUNIT=true
+    - COVERAGE=true CODE_STYLE=true
+
+install:
+ - composer install
+
+before_script:
+ - if [ "${COVERAGE}" != "true" ] && [ "$TRAVIS_PHP_VERSION" != "hhvm" ] && [ "$TRAVIS_PHP_VERSION" != "nightly" ]; then phpenv config-rm xdebug.ini && echo "xdebug disabled"; fi
+
+script:
+ - tool/run_phpunit_tests.sh
+ - tool/run_codestyle_tests.sh
+
+after_success:
+ - if [ "${COVERAGE}" = "true" ]; then make scrutinizer; fi
+
+

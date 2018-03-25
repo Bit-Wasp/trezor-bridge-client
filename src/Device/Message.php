@@ -35,11 +35,6 @@ class Message
         $this->proto = $protobuf;
     }
 
-    public function isType(int $messageType): bool
-    {
-        return $this->type === $messageType;
-    }
-
     public function getType(): int
     {
         return $this->type->value();
