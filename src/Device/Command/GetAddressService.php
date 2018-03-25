@@ -11,30 +11,31 @@ use BitWasp\TrezorProto\Address;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
 use BitWasp\TrezorProto\GetAddress;
-use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PinMatrixRequest;
 
 class GetAddressService extends DeviceService
 {
-    public function call(Session $session, CurrentPinInputInterface $currentPinInput, GetAddress $getAddress): Address
-    {
-        $message = $session->sendMessage(Message::getAddress($getAddress));
-        $proto = $message->getProto();
+    public function call(
+        Session $session,
+        CurrentPinInputInterface $currentPinInput,
+        GetAddress $getAddress
+    ): Address {
 
+        $proto = $session->sendMessage(Message::getAddress($getAddress));
         if ($proto instanceof PinMatrixRequest) {
-            $message = $session->sendMessage($this->provideCurrentPin($proto, $currentPinInput));
-            $proto = $message->getProto();
+            $proto = $session->sendMessage($this->provideCurrentPin($proto, $currentPinInput));
         }
 
         if ($getAddress->getShowDisplay()) {
             while ($proto instanceof ButtonRequest) {
-                $message = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Address_VALUE));
-                $proto = $message->getProto();
+                $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Address_VALUE));
             }
         }
 
-        $this->checkResponseType($message, MessageType::MessageType_Address_VALUE);
+        if (!($proto instanceof Address)) {
+            throw new \RuntimeException("Unexpected response, expecting Address, got " . get_class($proto));
+        }
 
-        return $message->getProto();
+        return $proto;
     }
 }

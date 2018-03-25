@@ -11,7 +11,6 @@ use BitWasp\Trezor\Device\PinInput\CurrentPassphraseInputInterface;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
-use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PassphraseRequest;
 use BitWasp\TrezorProto\Ping;
 use BitWasp\TrezorProto\PinMatrixRequest;
@@ -26,13 +25,11 @@ class PingService extends DeviceService
         CurrentPassphraseInputInterface $passphraseInput = null
     ): Success
     {
-        $message = $session->sendMessage(Message::ping($ping));
-        $proto = $message->getProto();
+        $proto = $session->sendMessage(Message::ping($ping));
 
         if ($proto instanceof ButtonRequest) {
             // allow user to accept with the button
-            $message = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
-            $proto = $message->getProto();
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
         }
 
         if ($ping->hasPinProtection()) {
@@ -42,8 +39,7 @@ class PingService extends DeviceService
                     throw new \InvalidArgumentException("Missing pin input");
                 }
 
-                $message = $session->sendMessage($this->provideCurrentPin($proto, $pinInput));
-                $proto = $message->getProto();
+                $proto = $session->sendMessage($this->provideCurrentPin($proto, $pinInput));
             }
         }
 
@@ -54,17 +50,19 @@ class PingService extends DeviceService
                     throw new \InvalidArgumentException("Missing passphrase input");
                 }
 
-                $message = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
-                $proto = $message->getProto();
+                $proto = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
             }
         }
 
-        $this->checkResponseType($message, MessageType::MessageType_Success_VALUE);
+        if (!($proto instanceof Success)) {
+            throw new \RuntimeException("Unexpected response, expecting Success, got " . get_class($proto));
+        }
+
         /** @var Success $proto */
         if (!hash_equals($proto->getMessage(), $proto->getMessage())) {
             throw new IncorrectNonceException("Nonce returned by device was incorrect");
         }
 
-        return $message->getProto();
+        return $proto;
     }
 }

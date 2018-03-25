@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Device\Message;

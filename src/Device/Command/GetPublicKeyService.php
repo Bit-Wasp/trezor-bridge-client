@@ -8,23 +8,25 @@ use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\GetPublicKey;
-use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PublicKey;
 
 class GetPublicKeyService extends DeviceService
 {
-    public function call(Session $session, CurrentPinInputInterface $currentPinInput, GetPublicKey $getPublicKey): PublicKey
-    {
-        $message = $session->sendMessage(Message::getPublicKey($getPublicKey));
-        $proto = $message->getProto();
-
+    public function call(
+        Session $session,
+        CurrentPinInputInterface $currentPinInput,
+        GetPublicKey $getPublicKey
+    ): PublicKey {
+        $proto = $session->sendMessage(Message::getPublicKey($getPublicKey));
         if ($proto instanceof PinMatrixRequest) {
-            $message = $session->sendMessage($this->provideCurrentPin($proto, $currentPinInput));
+            $proto = $session->sendMessage($this->provideCurrentPin($proto, $currentPinInput));
         }
 
-        $this->checkResponseType($message, MessageType::MessageType_PublicKey_VALUE);
+        if (!($proto instanceof PublicKey)) {
+            throw new \RuntimeException("Unexpected response, expecting PublicKey, got " . get_class($proto));
+        }
 
-        return $message->getProto();
+        return $proto;
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Device\Exception\Failure;
 
-use BitWasp\Trezor\Device\Exception\CommandFailureException;
+use BitWasp\Trezor\Device\Exception\FailureException;
 
-class ActionCancelledException extends CommandFailureException
+class ActionCancelledException extends FailureException
 {
 }

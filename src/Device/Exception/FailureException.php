@@ -8,7 +8,7 @@ use BitWasp\Trezor\Device\Exception\Failure as FailureErr;
 use BitWasp\TrezorProto\Failure;
 use BitWasp\TrezorProto\FailureType;
 
-abstract class CommandFailureException extends DeviceException
+abstract class FailureException extends DeviceException
 {
     const MAP_ERROR = [
         FailureType::Failure_UnexpectedMessage_VALUE => FailureErr\UnexpectedMessageException::class,

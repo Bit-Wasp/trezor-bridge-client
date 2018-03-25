@@ -5,6 +5,7 @@ declare(strict_types=1);
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\PingService;
 use BitWasp\Trezor\Device\Command\VerifyMessageService;
+use BitWasp\Trezor\Device\PinInput\CurrentPassphraseInput;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\CoinType;
@@ -48,9 +49,14 @@ if (!$btcNetwork) {
 $toSign = "this is my message!";
 
 $pingService = new PingService();
+$pinInput = new CurrentPassphraseInput();
+$passInput = new CurrentPassphraseInput();
 
 $nonce = random_bytes(16);
+
+// the false flags here determine what the user should be challenged with
 $ping = $reqFactory->ping($nonce, false, false, false);
-$success = $pingService->call($session, $ping);
+
+$success = $pingService->call($session, $ping, $pinInput, $passInput);
 var_dump($success);
 $session->release();

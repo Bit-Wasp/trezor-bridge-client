@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
@@ -11,14 +13,14 @@ use BitWasp\TrezorProto\GetEntropy;
 
 class GetEntropyService extends DeviceService
 {
-    public function call(Session $session, GetEntropy $getEntropy): Entropy
-    {
-        $message = $session->sendMessage(Message::getEntropy($getEntropy));
-        $proto = $message->getProto();
+    public function call(
+        Session $session,
+        GetEntropy $getEntropy
+    ): Entropy {
 
+        $proto = $session->sendMessage(Message::getEntropy($getEntropy));
         if ($proto instanceof ButtonRequest) {
-            $message = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
-            $proto = $message->getProto();
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
         }
 
         if (!($proto instanceof Entropy)) {
