@@ -9,6 +9,7 @@ use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\InputScriptType;
+use BitWasp\TrezorProto\Ping;
 use BitWasp\TrezorProto\SignMessage;
 use BitWasp\TrezorProto\VerifyMessage;
 
@@ -91,5 +92,15 @@ class RequestFactory
     public function signMessagePubKeyHash(string $coinName, array $path, string $message): SignMessage
     {
         return $this->rawSignMessage($coinName, $path, InputScriptType::SPENDADDRESS(), $message);
+    }
+
+    public function ping(string $nonce, bool $hasButtonProtect, bool $hasPinProtect, bool $hasPasswordProtect): Ping
+    {
+        $ping = new Ping();
+        $ping->setMessage($nonce);
+        $ping->setButtonProtection($hasButtonProtect);
+        $ping->setPinProtection($hasPinProtect);
+        $ping->setPassphraseProtection($hasPasswordProtect);
+        return $ping;
     }
 }

@@ -3,10 +3,12 @@
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Device\Message;
+use BitWasp\Trezor\Device\PinInput\CurrentPassphraseInputInterface;
 use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\ButtonAck;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\MessageType;
+use BitWasp\TrezorProto\PassphraseAck;
 use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PinMatrixRequestType;
@@ -54,5 +56,14 @@ abstract class DeviceService
         $pinMatrixAck->setPin($currentPinInput->getPin());
 
         return Message::pinMatrixAck($pinMatrixAck);
+    }
+
+
+    protected function provideCurrentPassphrase(PinMatrixRequest $proto, CurrentPassphraseInputInterface $passphraseInput): Message
+    {
+        $passphraseAck = new PassphraseAck();
+        $passphraseAck->setPassphrase($passphraseInput->getPassphrase());
+
+        return Message::passphraseAck($passphraseAck);
     }
 }

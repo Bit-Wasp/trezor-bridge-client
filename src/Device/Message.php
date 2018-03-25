@@ -10,6 +10,8 @@ use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\MessageType;
+use BitWasp\TrezorProto\PassphraseAck;
+use BitWasp\TrezorProto\Ping;
 use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\SignMessage;
 use BitWasp\TrezorProto\VerifyMessage;
@@ -79,6 +81,14 @@ class Message
         );
     }
 
+    public static function passphraseAck(PassphraseAck $passphraseAck): self
+    {
+        return new self(
+            MessageType::MessageType_PassphraseAck_VALUE,
+            $passphraseAck
+        );
+    }
+
     public static function initialize(Initialize $initialize): self
     {
         return new self(
@@ -108,6 +118,14 @@ class Message
         return new self(
             MessageType::MessageType_VerifyMessage_VALUE,
             $verifyMsg
+        );
+    }
+
+    public static function ping(Ping $ping): self
+    {
+        return new self(
+            MessageType::MessageType_Ping_VALUE,
+            $ping
         );
     }
 }
