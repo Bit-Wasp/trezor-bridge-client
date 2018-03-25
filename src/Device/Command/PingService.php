@@ -54,7 +54,7 @@ class PingService extends DeviceService
                     throw new \InvalidArgumentException("Missing passphrase input");
                 }
 
-                $message = $session->sendMessage($this->provideCurrentPassphrase($proto, $passphraseInput));
+                $message = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
                 $proto = $message->getProto();
             }
         }

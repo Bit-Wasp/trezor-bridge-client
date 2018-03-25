@@ -59,7 +59,7 @@ abstract class DeviceService
     }
 
 
-    protected function provideCurrentPassphrase(PinMatrixRequest $proto, CurrentPassphraseInputInterface $passphraseInput): Message
+    protected function provideCurrentPassphrase(CurrentPassphraseInputInterface $passphraseInput): Message
     {
         $passphraseAck = new PassphraseAck();
         $passphraseAck->setPassphrase($passphraseInput->getPassphrase());
