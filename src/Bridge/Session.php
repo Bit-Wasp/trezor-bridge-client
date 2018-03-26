@@ -70,7 +70,7 @@ class Session
     public function release()
     {
         $this->assertSessionIsActive();
-        $result = $this->client->release($this->sessionId);
+        $this->client->release($this->sessionId);
         $this->active = false;
     }
 
