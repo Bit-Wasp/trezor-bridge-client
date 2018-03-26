@@ -9,7 +9,14 @@ php:
 env:
   matrix:
     - PHPUNIT=true
-    - COVERAGE=true CODE_STYLE=true
+
+matrix:
+  exclude:
+    - php: 7.2
+      env: PHPUNIT=true
+  include:
+    - php: 7.2
+      env: PHPUNIT=true COVERAGE=true CODE_STYLE=true
 
 install:
  - composer install
