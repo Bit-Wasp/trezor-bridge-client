@@ -6,6 +6,10 @@ php:
  - 7.2
  - nightly
 
+branches:
+  only:
+    - "master"
+
 env:
   matrix:
     - PHPUNIT=true
