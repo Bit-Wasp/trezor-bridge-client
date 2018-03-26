@@ -18,6 +18,9 @@ phpunit-ci: pretest
 		mkdir -p build
 		php ${EXT_PHP} vendor/bin/phpunit --coverage-text --coverage-clover=build/coverage.clover
 
+ocular:
+		if [ ! -f ocular.phar ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
+
 ifdef OCULAR_TOKEN
 scrutinizer: ocular
 		@php ocular.phar code-coverage:upload --format=php-clover build/coverage.clover --access-token=$(OCULAR_TOKEN);
