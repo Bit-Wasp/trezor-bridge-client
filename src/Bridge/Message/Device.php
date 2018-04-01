@@ -61,6 +61,7 @@ class Device
 
     public function getObject(): \stdClass
     {
-        return $this->msg;
+        $clone = clone $this->msg;
+        return $clone;
     }
 }

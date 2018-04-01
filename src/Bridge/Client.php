@@ -45,7 +45,6 @@ class Client
         return new self(HttpClient::forUri($uri));
     }
 
-
     /**
      * @param \Psr\Http\Message\StreamInterface $body
      * @return mixed
