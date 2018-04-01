@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Bridge\Message;
 
+/**
+ * Class VersionResponse
+ * @package BitWasp\Trezor\Bridge\Message
+ * @property string $version
+ */
 class VersionResponse
 {
     /**
@@ -18,7 +23,7 @@ class VersionResponse
 
     public function __get($name)
     {
-        return $this->msg->$$name;
+        return $this->msg->{$name};
     }
 
     public function version()

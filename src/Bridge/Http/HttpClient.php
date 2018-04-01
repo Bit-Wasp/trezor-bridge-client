@@ -35,20 +35,25 @@ class HttpClient
      */
     private $callCodec;
 
-    public function __construct(GuzzleClient $client)
+    public function __construct(GuzzleClient $client, CallMessage\HexCodec $codec = null)
     {
         $this->client = $client;
-        $this->callCodec = new CallMessage\HexCodec();
+        $this->callCodec = $codec ?: new CallMessage\HexCodec();
     }
 
-    public static function forUri(string $uri): self
+    public static function forUri(string $uri, array $options = []): self
     {
-        return new self(new GuzzleClient([
-            'base_uri' => $uri,
-            'headers' => [
-                'Origin' => 'http://localhost:5000',
-            ],
-        ]));
+        return new self(new GuzzleClient(
+            array_merge(
+                $options,
+                [
+                'base_uri' => $uri,
+                'headers' => [
+                    'Origin' => 'http://localhost:5000',
+                ]
+                ]
+            )
+        ));
     }
 
     public function bridgeVersion(): ResponseInterface
