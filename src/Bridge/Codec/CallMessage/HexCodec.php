@@ -4,38 +4,29 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Bridge\Codec\CallMessage;
 
-use GuzzleHttp\Psr7\Stream;
+use BitWasp\Trezor\Bridge\Util\StreamUtil;
 use Psr\Http\Message\StreamInterface;
 
 class HexCodec
 {
-    private function stringToStream(string $stringToConvert)
+    /**
+     * @var StreamUtil
+     */
+    private $stream;
+
+    public function __construct()
     {
-        $stream = fopen('php://memory', 'w+');
-        if (!is_resource($stream)) {
-            throw new \RuntimeException("Failed to create stream");
-        }
-
-        $wrote = fwrite($stream, $stringToConvert);
-        if ($wrote !== strlen($stringToConvert)) {
-            throw new \RuntimeException("Failed to write to stream");
-        }
-
-        rewind($stream);
-        return $stream;
-    }
-
-    public function convertHexPayloadToBinary(StreamInterface $hexStream): StreamInterface
-    {
-        if ($hexStream->getSize() < 12) {
-            throw new \Exception("Malformed data (size too small)");
-        }
-
-        return new Stream($this->stringToStream(pack("H*", $hexStream->getContents())));
+        $this->stream = new StreamUtil();
     }
 
     public function parsePayload(StreamInterface $stream): array
     {
+        if ($stream->getSize() < 12) {
+            throw new \Exception("Malformed data (size too small)");
+        }
+
+        $stream = $this->stream->hex2bin($stream);
+
         list ($type) = array_values(unpack('n', $stream->read(2)));
         $stream->seek(2);
 
@@ -46,7 +37,7 @@ class HexCodec
             throw new \Exception("Malformed data (sent more than size)");
         }
 
-        return [$type, $this->stringToStream($stream->read($size))];
+        return [$type, $this->stream->createStream($stream->read($size))];
     }
 
     public function encode(int $messageType, \Protobuf\Message $protobuf): string
