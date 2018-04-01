@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Bridge\Util;
 
+use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\StreamInterface;
 
@@ -37,7 +38,7 @@ class StreamUtil
     {
         $hex = $hexStream->getContents();
         if (!ctype_xdigit($hex)) {
-            throw new \RuntimeException("Invalid hex as input");
+            throw new InvalidMessageException("Invalid hex as input");
         }
 
         return new Stream($this->createStream(pack("H*", $hex)));
