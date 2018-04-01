@@ -111,9 +111,7 @@ class HttpClient
             'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
         ]);
 
-        list ($type, $result) = $this->callCodec->parsePayload(
-            $this->callCodec->convertHexPayloadToBinary($response->getBody())
-        );
+        list ($type, $result) = $this->callCodec->parsePayload($response->getBody());
 
         $messageType = MessageType::valueOf($type);
         $protoType = substr($messageType->name(), $prefixLen);
