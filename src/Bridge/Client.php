@@ -8,6 +8,7 @@ use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
 use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Message\ListDevicesResponse;
+use BitWasp\Trezor\Bridge\Message\ListenResponse;
 use BitWasp\Trezor\Bridge\Message\VersionResponse;
 use BitWasp\Trezor\Bridge\Schema\ValidatorFactory;
 use BitWasp\Trezor\Bridge\Http\HttpClient;
@@ -116,9 +117,19 @@ class Client
         return new ListDevicesResponse($devices);
     }
 
-    public function listen(Device ...$devices)
+    public function listen(Device ...$devices): ListenResponse
     {
-        return $this->parseResponse($this->client->listen(...$devices)->getBody());
+        $result = $this->processResponse(
+            $this->client->listen(...$devices),
+            $this->validation->listDevicesResponse()
+        );
+
+        $devices = [];
+        foreach ($result as $device) {
+            $devices[] = new Device($device);
+        }
+
+        return new ListenResponse($devices);
     }
 
     /**

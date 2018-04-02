@@ -50,9 +50,11 @@ class ListDevicesTest extends TestCase
 
         $this->assertCount(count($requests), $container, 'should perform all requests');
 
-        /** @var RequestInterface $request */
-        $request = $container[0]['request'];
-        $this->assertEquals("http://localhost:21325/enumerate", (string) $request->getUri());
+        $this->assertCount(1, $response->devices());
+        $device1 = $response->devices()[0];
+        $this->assertEquals("hid1234", $device1->getPath());
+        $this->assertEquals("21324", $device1->getVendor());
+        $this->assertEquals("1", $device1->getProduct());
     }
 
     public function testMockWithInvalidSchema()
