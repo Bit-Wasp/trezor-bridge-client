@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use BitWasp\Trezor\Bridge\Client;
+use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\PingService;
 use BitWasp\Trezor\Device\PinInput\CurrentPassphraseInput;
@@ -11,7 +13,8 @@ use BitWasp\Trezor\Device\Util;
 require __DIR__ . "/../vendor/autoload.php";
 
 $useNetwork = "BTC";
-$trezor = \BitWasp\Trezor\Bridge\Client::fromUri("http://localhost:21325");
+$httpClient = HttpClient::forUri("http://localhost:21325");
+$trezor = new Client($httpClient);
 
 $hardened = pow(2, 31)-1;
 echo "list devices\n";
