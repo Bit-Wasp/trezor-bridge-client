@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
+use BitWasp\Trezor\Bridge\Client;
+use BitWasp\Trezor\Bridge\Http\HttpClient;
+
 require __DIR__ . "/../vendor/autoload.php";
 
 $useNetwork = "BTC";
 
-$trezor = \BitWasp\Trezor\Bridge\Client::fromUri("http://localhost:21325");
+$httpClient = HttpClient::forUri("http://localhost:21325");
+$trezor = new Client($httpClient);
 
 echo "list devices\n";
 $devices = $trezor->listDevices();

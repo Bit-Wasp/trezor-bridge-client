@@ -38,15 +38,6 @@ class Client
     }
 
     /**
-     * @param string $uri
-     * @return Client
-     */
-    public static function fromUri(string $uri)
-    {
-        return new self(HttpClient::forUri($uri));
-    }
-
-    /**
      * @param \Psr\Http\Message\StreamInterface $body
      * @return mixed
      */
