@@ -95,6 +95,13 @@ class BridgeVersionTest extends TestCase
 
         $this->expectException(SchemaValidationException::class);
 
-        $client->bridgeVersion();
+        try {
+            $client->bridgeVersion();
+        } catch (SchemaValidationException $e) {
+            $this->assertCount(1, $e->getErrors());
+            $error = $e->getErrors()[0];
+            $this->assertEquals("Array value found, but an object is required", $error['message']);
+            throw $e;
+        }
     }
 }

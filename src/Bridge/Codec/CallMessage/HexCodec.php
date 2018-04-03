@@ -42,6 +42,7 @@ class HexCodec
         }
 
         $stream = $this->stream->hex2bin($stream);
+
         list ($type) = array_values(unpack('n', $stream->read(2)));
         $stream->seek(2);
 

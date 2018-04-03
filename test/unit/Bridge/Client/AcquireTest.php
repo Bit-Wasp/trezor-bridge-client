@@ -6,7 +6,6 @@ namespace BitWasp\Test\Trezor\Bridge\Client;
 
 use BitWasp\Test\Trezor\Bridge\Message\TestCase;
 use BitWasp\Trezor\Bridge\Client;
-use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
 use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
 use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
@@ -14,7 +13,6 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use JsonSchema\Exception\InvalidSchemaException;
 use Psr\Http\Message\RequestInterface;
 
 class AcquireTest extends TestCase
@@ -77,11 +75,15 @@ class AcquireTest extends TestCase
 
         $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
         $client = new Client($httpClient);
-
         $device = new Device($deviceObj);
 
         $this->expectException(SchemaValidationException::class);
 
-        $client->acquire($device);
+        try {
+            $client->acquire($device);
+        } catch (SchemaValidationException $e) {
+            $this->assertCount(1, $e->getErrors());
+            throw $e;
+        }
     }
 }
