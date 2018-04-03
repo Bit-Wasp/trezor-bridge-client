@@ -5,21 +5,10 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Bridge\Codec\CallMessage;
 
 use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
-use BitWasp\Trezor\Bridge\Util\StreamUtil;
 use Psr\Http\Message\StreamInterface;
 
 class HexCodec
 {
-    /**
-     * @var StreamUtil
-     */
-    private $stream;
-
-    public function __construct()
-    {
-        $this->stream = new StreamUtil();
-    }
-
     /**
      * Implement integer comparison
      * Returns: 0 if  $a === $b
@@ -41,7 +30,12 @@ class HexCodec
             throw new InvalidMessageException("Malformed data (size too small)");
         }
 
-        $stream = $this->stream->hex2bin($stream);
+        $hex = $stream->getContents();
+        if (!ctype_xdigit($hex)) {
+            throw new InvalidMessageException("Invalid hex as input");
+        }
+
+        $stream = \Protobuf\Stream::fromString(pack("H*", $hex));
 
         list ($type) = array_values(unpack('n', $stream->read(2)));
         $stream->seek(2);
@@ -56,7 +50,7 @@ class HexCodec
             throw new InvalidMessageException("Malformed data (too much data)");
         }
 
-        return [$type, $this->stream->createStream($stream->read($size))];
+        return [$type, \Protobuf\Stream::wrap($stream->read($size))];
     }
 
     public function encode(int $messageType, \Protobuf\Message $protobuf): string

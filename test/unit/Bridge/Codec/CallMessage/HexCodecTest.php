@@ -7,8 +7,6 @@ namespace BitWasp\Test\Trezor\Bridge\Codec\CallMessage;
 use BitWasp\Test\Trezor\Bridge\Message\TestCase;
 use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
-use BitWasp\Trezor\Bridge\Util\StreamUtil;
-use GuzzleHttp\Psr7\Stream;
 
 class HexCodecTest extends TestCase
 {
@@ -30,30 +28,36 @@ class HexCodecTest extends TestCase
     public function testRequires(int $invalidLength)
     {
         $hexCodec = new HexCodec();
-        $streamUtil = new StreamUtil();
-        $stream = $streamUtil->createStream(str_repeat("0", $invalidLength));
+        $stream = \GuzzleHttp\Psr7\stream_for(str_repeat("0", $invalidLength));
         $this->expectException(InvalidMessageException::class);
         $this->expectExceptionMessage("Malformed data (size too small)");
-        $hexCodec->parsePayload(new Stream($stream));
+        $hexCodec->parsePayload($stream);
     }
 
     public function testRejectsExcessiveData()
     {
         $hexCodec = new HexCodec();
-        $streamUtil = new StreamUtil();
-        $stream = $streamUtil->createStream("00000000000001");
+        $stream = \GuzzleHttp\Psr7\stream_for("00000000000001");
         $this->expectException(InvalidMessageException::class);
         $this->expectExceptionMessage("Malformed data (too much data)");
-        $hexCodec->parsePayload(new Stream($stream));
+        $hexCodec->parsePayload($stream);
+    }
+
+    public function testRequiresValidHex()
+    {
+        $hexCodec = new HexCodec();
+        $stream = \GuzzleHttp\Psr7\stream_for("yadayadayadayada");
+        $this->expectException(InvalidMessageException::class);
+        $this->expectExceptionMessage("Invalid hex as input");
+        $hexCodec->parsePayload($stream);
     }
 
     public function testRejectsWithTooLitleData()
     {
         $hexCodec = new HexCodec();
-        $streamUtil = new StreamUtil();
-        $stream = $streamUtil->createStream("000001000000");
+        $stream = \GuzzleHttp\Psr7\stream_for("000001000000");
         $this->expectException(InvalidMessageException::class);
         $this->expectExceptionMessage("Malformed data (not enough data)");
-        $hexCodec->parsePayload(new Stream($stream));
+        $hexCodec->parsePayload($stream);
     }
 }
