@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\SignMessageService;
-use BitWasp\Trezor\Device\PinInput\CurrentPinInput;
+use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
+use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 use BitWasp\TrezorProto\CoinType;
 
@@ -43,7 +44,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
 
 $toSign = "this is my message!";
 
-$currentPinInput = new CurrentPinInput();
+$currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
 $signMessageService = new SignMessageService();
 
 $bip44Account1 = [44 | $hardened, 0 | $hardened, 0 | $hardened];

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 use BitWasp\Trezor\Device\Command\GetAddressService;
 use BitWasp\Trezor\Device\Command\InitializeService;
-use BitWasp\Trezor\Device\PinInput\CurrentPinInput;
+use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
+use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -42,7 +43,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
     throw new \RuntimeException("Failed to find requested network ({$useNetwork})");
 }
 
-$currentPinInput = new CurrentPinInput();
+$currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
 $addressService = new GetAddressService();
 $bip44Account1 = [44 | $hardened, 0 | $hardened, 0 | $hardened];
 $address0 = array_merge($bip44Account1, [0, 0]);

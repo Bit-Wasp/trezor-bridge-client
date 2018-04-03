@@ -1,6 +1,8 @@
 <?php
 
-namespace BitWasp\Trezor\Device\PinInput;
+declare(strict_types=1);
+
+namespace BitWasp\Trezor\Device\UserInput;
 
 interface CurrentPassphraseInputInterface
 {
