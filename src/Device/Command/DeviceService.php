@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Device\Message;
-use BitWasp\Trezor\Device\PinInput\CurrentPassphraseInputInterface;
-use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
+use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInputInterface;
+use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\ButtonAck;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\MessageType;

@@ -6,7 +6,7 @@ namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Message;
-use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
+use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
 use BitWasp\TrezorProto\MessageSignature;

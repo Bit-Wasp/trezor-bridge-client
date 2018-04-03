@@ -6,7 +6,7 @@ namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Message;
-use BitWasp\Trezor\Device\PinInput\CurrentPinInputInterface;
+use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PublicKey;
