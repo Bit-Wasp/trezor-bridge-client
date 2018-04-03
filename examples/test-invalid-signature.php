@@ -15,7 +15,7 @@ require __DIR__ . "/../vendor/autoload.php";
 
 $useNetwork = "BTC";
 $httpClient = HttpClient::forUri("http://localhost:21325");
-w$trezor = new Client($httpClient);
+$trezor = new Client($httpClient);
 
 $hardened = pow(2, 31)-1;
 echo "list devices\n";

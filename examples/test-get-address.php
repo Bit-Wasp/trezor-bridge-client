@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use BitWasp\Trezor\Bridge\Client;
+use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Device\Command\GetAddressService;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
