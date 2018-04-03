@@ -6,7 +6,7 @@ namespace BitWasp\Trezor\Bridge\Schema;
 
 class ValidatorFactory
 {
-    const VERSION_RESPONSE_VALIDATOR = <<<JSON
+    const VERSION_RESPONSE_VALIDATOR = <<<EOJSON
 {
     "title": "VersionResponse",
     "type": "object",
@@ -17,9 +17,9 @@ class ValidatorFactory
     },
     "required": ["version"]
 }
-JSON;
+EOJSON;
 
-    const LIST_DEVICES_RESPONSE_VALIDATOR = <<<JSON
+    const LIST_DEVICES_RESPONSE_VALIDATOR = <<<EOJSON
 {
   "title": "ListDevicesResponse",
   "type": "array",
@@ -44,9 +44,9 @@ JSON;
     ]
   }
 }
-JSON;
+EOJSON;
 
-    const ACQUIRE_RESPONSE_VALIDATOR = <<<JSON
+    const ACQUIRE_RESPONSE_VALIDATOR = <<<EOJSON
 {
   "title": "AcquireResponse",
   "type": "object",  
@@ -59,34 +59,16 @@ JSON;
     "session"
   ]
 }
-JSON;
+EOJSON;
 
-    const RELEASE_RESPONSE_VALIDATOR = <<<JSON
+    const RELEASE_RESPONSE_VALIDATOR = <<<EOJSON
 {
   "title": "ReleaseResponse",
   "type": "object",  
   "properties": {},
   "required": []
 }
-JSON;
-
-    const CALL_RESPONSE_VALIDATOR = <<<JSON
-{
-  "title": "CallResponse",
-  "type": "object",  
-  "properties": {
-    "type": {
-      "type": "string"
-    },
-    "body": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "type", "body"
-  ]
-}
-JSON;
+EOJSON;
 
     public function versionResponse(): \stdClass
     {
@@ -106,10 +88,5 @@ JSON;
     public function releaseResponse(): \stdClass
     {
         return json_decode(self::RELEASE_RESPONSE_VALIDATOR);
-    }
-
-    public function callResponse(): \stdClass
-    {
-        return json_decode(self::CALL_RESPONSE_VALIDATOR);
     }
 }

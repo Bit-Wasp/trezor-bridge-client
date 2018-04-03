@@ -100,6 +100,7 @@ class Session
      */
     public function sendMessage(Message $message): ProtoMessage
     {
+        $this->assertSessionIsActive();
         $message = $this->client->call($this->getSessionId(), $message);
         $proto = $message->getProto();
         if ($proto instanceof Failure) {
