@@ -139,4 +139,68 @@ class RequestFactoryTest extends TestCase
         $this->assertEquals($coinName, $getPublicKey->getCoinName());
         $this->assertEquals($path, $getPublicKey->getAddressNList()->getArrayCopy());
     }
+
+    public function getPingFixtures(): array
+    {
+        return [
+            ['abc', false, false, false, ],
+            ['def', false, false, true, ],
+            ['hij', false, true, true, ],
+            ['klm', true, false, false, ],
+        ];
+    }
+
+    /**
+     * @dataProvider getPingFixtures
+     * @param string $nonce
+     * @param bool $button
+     * @param bool $pin
+     * @param bool $pass
+     */
+    public function testPing(string $nonce, bool $button, bool $pin, bool $pass)
+    {
+        $ping = $this->factory->ping($nonce, $button, $pin, $pass);
+        $this->assertEquals($button, $ping->getButtonProtection());
+        $this->assertEquals($pin, $ping->getPinProtection());
+        $this->assertEquals($pass, $ping->getPassphraseProtection());
+    }
+
+    public function testVerifyMessage()
+    {
+        $address = "1HksNAfGmaMYAAzidJcAdgfjXy89ajYWpD";
+        $signature = base64_decode("HywU/GSkCe1fghjTt/D9YPA2pTXSZUfcT3WNn5XpnZGIcfQvuEZH2LGAXiBTsypIITmrwXF8LxZWq5MCLo/kxp0=");
+        $message = "this is my message!";
+
+        $msg = $this->factory->verifyMessage("Bitcoin", $address, $signature, $message);
+        $this->assertEquals("Bitcoin", $msg->getCoinName());
+        $this->assertEquals($address, $msg->getAddress());
+        $this->assertEquals($signature, $msg->getSignature());
+        $this->assertEquals($message, $msg->getMessage());
+    }
+
+    public function testSignRawMessage()
+    {
+
+        $message = "this is my message!";
+        $path = [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0];
+        $inScript = InputScriptType::SPENDADDRESS();
+
+        $msg = $this->factory->rawSignMessage("Bitcoin", $path, $inScript, $message);
+        $this->assertEquals("Bitcoin", $msg->getCoinName());
+        $this->assertEquals($inScript->value(), $msg->getScriptType()->value());
+        $this->assertEquals($path, $msg->getAddressNList()->getArrayCopy());
+        $this->assertEquals($message, $msg->getMessage());
+    }
+
+    public function testSignAddressMessage()
+    {
+        $message = "this is my message!";
+        $path = [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0];
+
+        $msg = $this->factory->signMessagePubKeyHash("Bitcoin", $path, $message);
+        $this->assertEquals("Bitcoin", $msg->getCoinName());
+        $this->assertEquals(InputScriptType::SPENDADDRESS()->value(), $msg->getScriptType()->value());
+        $this->assertEquals($path, $msg->getAddressNList()->getArrayCopy());
+        $this->assertEquals($message, $msg->getMessage());
+    }
 }

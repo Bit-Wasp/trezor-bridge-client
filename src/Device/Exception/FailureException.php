@@ -32,12 +32,13 @@ abstract class FailureException extends DeviceException
      */
     public static function handleFailure(Failure $failure)
     {
-        $key = $failure->getCode()->value();
-        if (array_key_exists($key, self::MAP_ERROR)) {
-            $concrete = self::MAP_ERROR[$key];
-            throw new $concrete($failure->getMessage(), 0);
+        if ($code = $failure->getCode()) {
+            if (array_key_exists($code->value(), self::MAP_ERROR)) {
+                $concrete = self::MAP_ERROR[$code->value()];
+                throw new $concrete($failure->getMessage(), 0);
+            }
         }
 
-        throw new FailureErr\UnknownError($failure->getMessage(), $failure->getCode()->value());
+        throw new FailureErr\UnknownError($failure->getMessage());
     }
 }
