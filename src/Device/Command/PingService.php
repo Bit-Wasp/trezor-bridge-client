@@ -24,8 +24,15 @@ class PingService extends DeviceService
         CurrentPinInputInterface $pinInput = null,
         CurrentPassphraseInputInterface $passphraseInput = null
     ): Success {
-        $proto = $session->sendMessage(Message::ping($ping));
+        if ($ping->hasPinProtection() && $ping->getPinProtection() && $pinInput === null) {
+            throw new \InvalidArgumentException("Missing pin input");
+        }
 
+        if ($ping->hasPassphraseProtection() && $ping->getPassphraseProtection() && $passphraseInput === null) {
+            throw new \InvalidArgumentException("Missing passphrase input");
+        }
+
+        $proto = $session->sendMessage(Message::ping($ping));
         if ($proto instanceof ButtonRequest) {
             // allow user to accept with the button
             $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
@@ -34,10 +41,6 @@ class PingService extends DeviceService
         if ($ping->hasPinProtection()) {
             // allow user to accept with their pin
             if ($proto instanceof PinMatrixRequest) {
-                if (!$pinInput) {
-                    throw new \InvalidArgumentException("Missing pin input");
-                }
-
                 $proto = $session->sendMessage($this->provideCurrentPin($proto, $pinInput));
             }
         }
@@ -45,10 +48,6 @@ class PingService extends DeviceService
         if ($ping->hasPassphraseProtection()) {
             // allow user to accept with their passphrase
             if ($proto instanceof PassphraseRequest) {
-                if (!$passphraseInput) {
-                    throw new \InvalidArgumentException("Missing passphrase input");
-                }
-
                 $proto = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
             }
         }
@@ -58,7 +57,7 @@ class PingService extends DeviceService
         }
 
         /** @var Success $proto */
-        if (!hash_equals($proto->getMessage(), $proto->getMessage())) {
+        if (!hash_equals($proto->getMessage(), $ping->getMessage())) {
             throw new IncorrectNonceException("Nonce returned by device was incorrect");
         }
 
