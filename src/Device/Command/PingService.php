@@ -6,6 +6,7 @@ namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Exception\IncorrectNonceException;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInputInterface;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
@@ -53,7 +54,7 @@ class PingService extends DeviceService
         }
 
         if (!($proto instanceof Success)) {
-            throw new \RuntimeException("Unexpected response, expecting Success, got " . get_class($proto));
+            throw new UnexpectedResultException("Unexpected response, expecting Success, got " . get_class($proto));
         }
 
         /** @var Success $proto */

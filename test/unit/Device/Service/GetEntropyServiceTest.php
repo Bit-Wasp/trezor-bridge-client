@@ -12,6 +12,7 @@ use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\GetEntropyService;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
@@ -81,7 +82,7 @@ class GetEntropyServiceTest extends TestCase
 
         $getEntropyService = new GetEntropyService();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected message returned, expecting Entropy");
 
         $getEntropyService->call($session, $getEntropy);

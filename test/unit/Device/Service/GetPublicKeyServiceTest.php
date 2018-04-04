@@ -12,6 +12,7 @@ use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\GetPublicKeyService;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
@@ -103,15 +104,7 @@ class GetPublicKeyServiceTest extends TestCase
         $reqFactory = new RequestFactory();
         $getPublicKey = $reqFactory->getPublicKey('Bitcoin', $path, false);
 
-        $pinInputBuilder = $this
-            ->getMockBuilder(CurrentPinInput::class)
-            ->disableOriginalConstructor()
-        ;
-
-        $pinInput = $pinInputBuilder->getMock();
-        $pinInput->expects($this->once())
-            ->method('getPin')
-            ->willReturn('123456');
+        $pinInput = $this->getMockSinglePinInput('12345');
 
         $getPublicKeyService = new GetPublicKeyService();
         $success = $getPublicKeyService->call($session, $pinInput, $getPublicKey);
@@ -145,7 +138,7 @@ class GetPublicKeyServiceTest extends TestCase
         $pinInput = new CurrentPinInput(new FgetsUserInputRequest());
         $getPublicKeyService = new GetPublicKeyService();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected response, expecting PublicKey, got BitWasp\\TrezorProto\\Features");
 
         $getPublicKeyService->call($session, $pinInput, $getPublicKey);

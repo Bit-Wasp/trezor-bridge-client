@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
@@ -24,7 +25,7 @@ class GetEntropyService extends DeviceService
         }
 
         if (!($proto instanceof Entropy)) {
-            throw new \RuntimeException("Unexpected message returned, expecting Entropy");
+            throw new UnexpectedResultException("Unexpected message returned, expecting Entropy");
         }
 
         return $proto;

@@ -11,6 +11,7 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\InitializeService;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\MessageType;
@@ -40,7 +41,7 @@ class InitializeServiceTest extends TestCase
 
         $initService = new InitializeService();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected response, expecting Features, got BitWasp\\TrezorProto\\Success");
 
         $initService->call($session, $initialize);
