@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\GetPublicKey;
@@ -24,7 +25,7 @@ class GetPublicKeyService extends DeviceService
         }
 
         if (!($proto instanceof PublicKey)) {
-            throw new \RuntimeException("Unexpected response, expecting PublicKey, got " . get_class($proto));
+            throw new UnexpectedResultException("Unexpected response, expecting PublicKey, got " . get_class($proto));
         }
 
         return $proto;

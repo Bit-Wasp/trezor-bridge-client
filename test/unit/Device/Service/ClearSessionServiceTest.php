@@ -11,6 +11,7 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\ClearSessionService;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\MessageType;
@@ -41,7 +42,7 @@ class ClearSessionServiceTest extends TestCase
 
         $clrSessionService = new ClearSessionService();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected response, expecting Success, got BitWasp\\TrezorProto\\Features");
 
         $clrSessionService->call($session, $clearSession);

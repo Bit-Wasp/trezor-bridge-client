@@ -13,6 +13,7 @@ use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\PingService;
 use BitWasp\Trezor\Device\Exception\IncorrectNonceException;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInput;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
@@ -87,7 +88,7 @@ class PingServiceTest extends TestCase
 
         $pingService = new PingService();
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected response, expecting Success, got BitWasp\\TrezorProto\\Features");
 
         $pingService->call($session, $ping);

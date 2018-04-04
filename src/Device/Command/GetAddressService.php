@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BitWasp\Trezor\Device\Command;
 
 use BitWasp\Trezor\Bridge\Session;
+use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\Address;
@@ -33,7 +34,7 @@ class GetAddressService extends DeviceService
         }
 
         if (!($proto instanceof Address)) {
-            throw new \RuntimeException("Unexpected response, expecting Address, got " . get_class($proto));
+            throw new UnexpectedResultException("Unexpected response, expecting Address, got " . get_class($proto));
         }
 
         return $proto;
