@@ -10,7 +10,7 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
-use BitWasp\Trezor\Device\Command\InitializeService;
+use BitWasp\Trezor\Device\Command\ClearSessionService;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\MessageType;
@@ -21,15 +21,15 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 
-class InitializeServiceTest extends TestCase
+class ClearSessionServiceTest extends TestCase
 {
     public function testWrongResultType()
     {
-        $wrongMsg = new Success();
+        $wrongMsg = new Features();
 
         $codec = new HexCodec();
         $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $wrongMsg)),
+            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $wrongMsg)),
         ];
 
         // Create a mock and queue two responses.
@@ -49,23 +49,23 @@ class InitializeServiceTest extends TestCase
         $session = new Session($client, $device, '1');
 
         $reqFactory = new RequestFactory();
-        $initialize = $reqFactory->initialize();
+        $clearSession = $reqFactory->clearSession();
 
-        $initService = new InitializeService();
+        $clrSessionService = new ClearSessionService();
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage("Unexpected response, expecting Features, got BitWasp\\TrezorProto\\Success");
+        $this->expectExceptionMessage("Unexpected response, expecting Success, got BitWasp\\TrezorProto\\Features");
 
-        $initService->call($session, $initialize);
+        $clrSessionService->call($session, $clearSession);
     }
 
-    public function testReturnsFeatures()
+    public function testReturnsSuccess()
     {
-        $features = new Features();
+        $features = new Success();
 
         $codec = new HexCodec();
         $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $features)),
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $features)),
         ];
 
         // Create a mock and queue two responses.
@@ -85,11 +85,11 @@ class InitializeServiceTest extends TestCase
         $session = new Session($client, $device, '1');
 
         $reqFactory = new RequestFactory();
-        $initialize = $reqFactory->initialize();
+        $clearSession = $reqFactory->clearSession();
 
-        $initService = new InitializeService();
-        $features = $initService->call($session, $initialize);
+        $clrSessionService = new ClearSessionService();
+        $features = $clrSessionService->call($session, $clearSession);
 
-        $this->assertInstanceOf(Features::class, $features);
+        $this->assertInstanceOf(Success::class, $features);
     }
 }

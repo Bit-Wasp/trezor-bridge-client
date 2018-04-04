@@ -26,7 +26,6 @@ use BitWasp\TrezorProto\Ping;
 use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PinMatrixRequestType;
-use BitWasp\TrezorProto\PublicKey;
 use BitWasp\TrezorProto\Success;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
