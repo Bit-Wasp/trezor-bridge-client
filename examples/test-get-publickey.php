@@ -46,7 +46,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
 
 $currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
 $publicKeyService = new GetPublicKeyService();
-$getPublicKey = $reqFactory->getPublicKey($btcNetwork->getCoinName(), [1]);
+$getPublicKey = $reqFactory->getPublicKey($btcNetwork->getCoinName(), [1], false);
 $publicKey = $publicKeyService->call($session, $currentPinInput, $getPublicKey);
 
 echo "xpub: ".$publicKey->getXpub().PHP_EOL;

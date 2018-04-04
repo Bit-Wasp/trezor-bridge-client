@@ -121,9 +121,9 @@ class RequestFactoryTest extends TestCase
     public function getPubkeyFixtures(): array
     {
         return [
-            ["Bitcoin", [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], null],
-            ["Bitcoin", [84 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], "secp256k1"],
-            ["Bitcoin", [84 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], "nistp256"],
+            ["Bitcoin", [44 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], true, null],
+            ["Bitcoin", [84 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], false, "secp256k1"],
+            ["Bitcoin", [84 | 0x80000000, 0 | 0x80000000, 0 | 0x80000000, 0, 0], true, "nistp256"],
         ];
     }
 
@@ -133,11 +133,12 @@ class RequestFactoryTest extends TestCase
      * @param array $path
      * @param string $curveName
      */
-    public function testGetPublicKey(string $coinName, array $path, string $curveName = null)
+    public function testGetPublicKey(string $coinName, array $path, bool $showDisplay, string $curveName = null)
     {
-        $getPublicKey = $this->factory->getPublicKey($coinName, $path, $curveName);
+        $getPublicKey = $this->factory->getPublicKey($coinName, $path, $showDisplay, $curveName);
         $this->assertEquals($coinName, $getPublicKey->getCoinName());
         $this->assertEquals($path, $getPublicKey->getAddressNList()->getArrayCopy());
+        $this->assertEquals($showDisplay, $getPublicKey->getShowDisplay());
     }
 
     public function getPingFixtures(): array

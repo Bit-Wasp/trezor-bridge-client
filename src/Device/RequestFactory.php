@@ -28,9 +28,10 @@ class RequestFactory
         return $getEntropy;
     }
 
-    public function getPublicKey(string $coinName, array $path, string $curveName = null): GetPublicKey
+    public function getPublicKey(string $coinName, array $path, bool $showDisplay, string $curveName = null): GetPublicKey
     {
         $getPublicKey = new GetPublicKey();
+        $getPublicKey->setShowDisplay($showDisplay);
         $getPublicKey->setCoinName($coinName);
         foreach ($path as $sequence) {
             $getPublicKey->addAddressN($sequence);
