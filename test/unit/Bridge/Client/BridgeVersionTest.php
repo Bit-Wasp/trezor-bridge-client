@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace BitWasp\Test\Trezor\Bridge\Client;
 
 use BitWasp\Test\Trezor\Bridge\Message\TestCase;
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Exception\InvalidMessageException;
 use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
@@ -21,50 +22,31 @@ class BridgeVersionTest extends TestCase
 
     public function testMockBridgeVersion()
     {
-        $body = [
-            'version' => '1.0.0'
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([
+                'version' => '1.0.0'
+            ]))
+        );
 
-        $requests = [
-            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode($body)),
-        ];
-
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $response = $client->bridgeVersion();
 
         $this->assertEquals('1.0.0', $response->version);
+        $this->assertEquals('1.0.0', $response->version());
     }
 
     public function testMockWithInvalidJson()
     {
-        $requests = [
-            new Response(200, ['Content-Type' => $this->contentTypeJson], "abcd1234"),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, ['Content-Type' => $this->contentTypeJson], "abcd1234")
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
 
         $this->expectException(InvalidMessageException::class);
@@ -75,28 +57,20 @@ class BridgeVersionTest extends TestCase
 
     public function testMockWithInvalidSchema()
     {
-        $requests = [
-            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([])),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([]))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
 
         $this->expectException(SchemaValidationException::class);
 
         try {
             $client->bridgeVersion();
+            $this->fail("shouldn't succeed");
         } catch (SchemaValidationException $e) {
             $this->assertCount(1, $e->getErrors());
             $error = $e->getErrors()[0];
