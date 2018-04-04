@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace BitWasp\Test\Trezor\Bridge\Client;
 
 use BitWasp\Test\Trezor\Bridge\Message\TestCase;
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
-use BitWasp\Trezor\Bridge\Http\HttpClient;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\RequestInterface;
 
 class ListDevicesTest extends TestCase
 {
@@ -20,63 +16,42 @@ class ListDevicesTest extends TestCase
 
     public function testMockListDevices()
     {
-        $body = [
-            [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([[
                 'path' => 'hid1234',
                 'session' => '',
                 'vendor' => '21324',
                 'product' => '1',
-            ]
-        ];
+            ]]))
+        );
 
-        $requests = [
-            new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode($body)),
-        ];
-
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $response = $client->listDevices();
 
-        $this->assertCount(count($requests), $container, 'should perform all requests');
+        $this->assertCount(1, $response, 'should perform all requests');
+        $this->assertCount(1, $response->devices(), 'should perform all requests');
 
-        $this->assertCount(1, $response->devices());
         $device1 = $response->devices()[0];
         $this->assertEquals("hid1234", $device1->getPath());
         $this->assertEquals("21324", $device1->getVendor());
+        $this->assertEquals("", $device1->getSession());
         $this->assertEquals("1", $device1->getProduct());
     }
 
     public function testMockWithInvalidSchema()
     {
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([
                 'version' => '1.2.0'
-            ])),
-        ];
+            ]))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
 
         $this->expectException(SchemaValidationException::class);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Trezor\Bridge\Message;
 
-abstract class DeviceListResponse
+abstract class DeviceListResponse implements \Countable
 {
     /**
      * @var Device[]
@@ -23,6 +23,11 @@ abstract class DeviceListResponse
         }
 
         $this->devices = $devices;
+    }
+
+    public function count(): int
+    {
+        return count($this->devices);
     }
 
     /**
