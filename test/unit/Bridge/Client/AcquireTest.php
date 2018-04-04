@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace BitWasp\Test\Trezor\Bridge\Client;
 
 use BitWasp\Test\Trezor\Bridge\Message\TestCase;
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Exception\SchemaValidationException;
-use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\RequestInterface;
 
 class AcquireTest extends TestCase
 {
@@ -23,30 +19,21 @@ class AcquireTest extends TestCase
     {
         $deviceObj = $this->createDevice("hidabc123", 21324, 1);
 
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([
                 'session' => '2',
-            ])),
-        ];
+            ]))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
 
         $device = new Device($deviceObj);
         $session = $client->acquire($device);
 
-        $this->assertCount(count($requests), $container, 'should perform all requests');
+        $this->assertCount(1, $httpStack->getRequestLogs(), 'should perform all requests');
 
         $this->assertEquals('2', $session->getSessionId());
         $this->assertSame($device, $session->getDevice());
@@ -56,24 +43,15 @@ class AcquireTest extends TestCase
     {
         $deviceObj = $this->createDevice("hidabc123", 21324, 1);
 
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, ['Content-Type' => $this->contentTypeJson], \json_encode([
-                'session',
-            ])),
-        ];
+                'session'
+            ]))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($deviceObj);
 
