@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 class MockHttpStack
 {
     /**
-     * @var RequestInterface[] $requestLog
+     * @var array[] $requestLog
      */
     private $requestLog = [];
 
@@ -34,7 +34,7 @@ class MockHttpStack
         ]));
     }
 
-    public function getRequestLogs()
+    public function getRequestLogs(): array
     {
         return $this->requestLog;
     }

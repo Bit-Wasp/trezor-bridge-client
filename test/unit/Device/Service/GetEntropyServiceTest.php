@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor\Device\Service;
 
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
@@ -35,23 +36,15 @@ class GetEntropyServiceTest extends TestCase
         $entropy->setEntropy(\Protobuf\Stream::fromString($retData));
 
         $codec = new HexCodec();
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, [], $codec->encode(MessageType::MessageType_ButtonRequest()->value(), $buttonRequest)),
-            new Response(200, [], $codec->encode(MessageType::MessageType_Entropy()->value(), $entropy)),
-        ];
+            new Response(200, [], $codec->encode(MessageType::MessageType_Entropy()->value(), $entropy))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
+        $httpClient = $httpStack->getClient();
 
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -71,22 +64,14 @@ class GetEntropyServiceTest extends TestCase
         $features = new Features();
 
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $features)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $features))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
+        $httpClient = $httpStack->getClient();
 
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');

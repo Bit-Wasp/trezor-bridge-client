@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor\Device\Service;
 
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
@@ -27,11 +28,7 @@ use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PinMatrixRequestType;
 use BitWasp\TrezorProto\Success;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\RequestInterface;
 
 class PingServiceTest extends TestCase
 {
@@ -74,22 +71,13 @@ class PingServiceTest extends TestCase
         $wrongMsg = new Features();
 
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $wrongMsg)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $wrongMsg))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -111,22 +99,13 @@ class PingServiceTest extends TestCase
         $success->setMessage('someothernonceunrelated');
 
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -147,27 +126,17 @@ class PingServiceTest extends TestCase
         $success->setMessage('abcd1234nonce');
 
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
 
-        $nonce = 'abc123';
         $reqFactory = new RequestFactory();
         $ping = $reqFactory->ping('abcd1234nonce', false, false, false);
 
@@ -187,23 +156,14 @@ class PingServiceTest extends TestCase
         $success->setMessage('abcd1234nonce');
 
         $codec = new HexCodec();
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, [], $codec->encode(MessageType::MessageType_ButtonRequest()->value(), $buttonRequest)),
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success)),
-        ];
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -217,11 +177,9 @@ class PingServiceTest extends TestCase
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
 
-        $this->assertCount(2, $container);
-        /** @var RequestInterface $req1 */
-        /** @var RequestInterface $req2 */
-        $req1 = $container[0]['request'];
-        $req2 = $container[1]['request'];
+        $this->assertCount(2, $httpStack->getRequestLogs());
+        $req1 = $httpStack->getRequest(0);
+        $req2 = $httpStack->getRequest(1);
         $this->assertEquals("http://localhost:21325/call/1", (string) $req1->getUri());
         $this->assertEquals("http://localhost:21325/call/1", (string) $req2->getUri());
 
@@ -247,23 +205,14 @@ class PingServiceTest extends TestCase
         $success->setMessage('abcd1234nonce');
 
         $codec = new HexCodec();
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, [], $codec->encode(MessageType::MessageType_PinMatrixRequest()->value(), $pinRequest)),
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success)),
-        ];
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -287,11 +236,9 @@ class PingServiceTest extends TestCase
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
 
-        $this->assertCount(2, $container);
-        /** @var RequestInterface $req1 */
-        /** @var RequestInterface $req2 */
-        $req1 = $container[0]['request'];
-        $req2 = $container[1]['request'];
+        $this->assertCount(2, $httpStack->getRequestLogs());
+        $req1 = $httpStack->getRequest(0);
+        $req2 = $httpStack->getRequest(1);
         $this->assertEquals("http://localhost:21325/call/1", (string) $req1->getUri());
         $this->assertEquals("http://localhost:21325/call/1", (string) $req2->getUri());
 
@@ -317,23 +264,14 @@ class PingServiceTest extends TestCase
         $success->setMessage('abcd1234nonce');
 
         $codec = new HexCodec();
-        $requests = [
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, [], $codec->encode(MessageType::MessageType_PassphraseRequest()->value(), $pinRequest)),
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success)),
-        ];
+            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $success))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -357,11 +295,9 @@ class PingServiceTest extends TestCase
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
 
-        $this->assertCount(2, $container);
-        /** @var RequestInterface $req1 */
-        /** @var RequestInterface $req2 */
-        $req1 = $container[0]['request'];
-        $req2 = $container[1]['request'];
+        $this->assertCount(2, $httpStack->getRequestLogs());
+        $req1 = $httpStack->getRequest(0);
+        $req2 = $httpStack->getRequest(1);
         $this->assertEquals("http://localhost:21325/call/1", (string) $req1->getUri());
         $this->assertEquals("http://localhost:21325/call/1", (string) $req2->getUri());
 

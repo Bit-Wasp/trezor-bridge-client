@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor\Device\Service;
 
+use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
@@ -43,22 +44,13 @@ class GetPublicKeyServiceTest extends TestCase
         $publicKey->setXpub("xprvA4Apf1Dg1po8BsqxwFb22gfDpJzoTrRDTTbspdoZjZE3BkYfWoWphDaxQXcAji7ciLagegZ2q8kU2yjfE9gs6EEDsbhZMMT1t3ivCGupCqk");
 
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_PublicKey()->value(), $publicKey)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_PublicKey()->value(), $publicKey))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -95,23 +87,15 @@ class GetPublicKeyServiceTest extends TestCase
         $publicKey->setXpub("xprvA4Apf1Dg1po8BsqxwFb22gfDpJzoTrRDTTbspdoZjZE3BkYfWoWphDaxQXcAji7ciLagegZ2q8kU2yjfE9gs6EEDsbhZMMT1t3ivCGupCqk");
 
         $codec = new HexCodec();
-        $requests = [
+
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
             new Response(200, [], $codec->encode(MessageType::MessageType_PinMatrixRequest()->value(), $pinRequest)),
-            new Response(200, [], $codec->encode(MessageType::MessageType_PublicKey()->value(), $publicKey)),
-        ];
+            new Response(200, [], $codec->encode(MessageType::MessageType_PublicKey()->value(), $publicKey))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
@@ -143,22 +127,13 @@ class GetPublicKeyServiceTest extends TestCase
     {
         $features = new Features();
         $codec = new HexCodec();
-        $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $features)),
-        ];
+        $httpStack = new MockHttpStack(
+            "http://localhost:21325",
+            [],
+            new Response(200, [], $codec->encode(MessageType::MessageType_Features()->value(), $features))
+        );
 
-        // Create a mock and queue two responses.
-        $mock = new MockHandler($requests);
-
-        /** @var RequestInterface[] $container */
-        $container = [];
-        $history = Middleware::history($container);
-
-        // Add the history middleware to the handler stack.
-        $stack = HandlerStack::create($mock);
-        $stack->push($history);
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/", ['handler' => $stack,]);
+        $httpClient = $httpStack->getClient();
         $client = new Client($httpClient);
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
