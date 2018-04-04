@@ -10,26 +10,34 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
-use BitWasp\Trezor\Device\Command\InitializeService;
+use BitWasp\Trezor\Device\Command\GetEntropyService;
 use BitWasp\Trezor\Device\RequestFactory;
+use BitWasp\TrezorProto\ButtonRequest;
+use BitWasp\TrezorProto\ButtonRequestType;
+use BitWasp\TrezorProto\Entropy;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\MessageType;
-use BitWasp\TrezorProto\Success;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 
-class InitializeServiceTest extends TestCase
+class GetEntropyServiceTest extends TestCase
 {
-    public function testWrongResultType()
+    public function testButtonAck()
     {
-        $wrongMsg = new Success();
+        $buttonRequest = new ButtonRequest();
+        $buttonRequest->setCode(ButtonRequestType::ButtonRequest_ProtectCall());
+
+        $retData = '42424242424242424242424242424242';
+        $entropy = new Entropy();
+        $entropy->setEntropy(\Protobuf\Stream::fromString($retData));
 
         $codec = new HexCodec();
         $requests = [
-            new Response(200, [], $codec->encode(MessageType::MessageType_Success()->value(), $wrongMsg)),
+            new Response(200, [], $codec->encode(MessageType::MessageType_ButtonRequest()->value(), $buttonRequest)),
+            new Response(200, [], $codec->encode(MessageType::MessageType_Entropy()->value(), $entropy)),
         ];
 
         // Create a mock and queue two responses.
@@ -49,17 +57,16 @@ class InitializeServiceTest extends TestCase
         $session = new Session($client, $device, '1');
 
         $reqFactory = new RequestFactory();
-        $initialize = $reqFactory->initialize();
+        $getEntropy = $reqFactory->getEntropy(32);
 
-        $initService = new InitializeService();
+        $getEntropyService = new GetEntropyService();
+        $entropy = $getEntropyService->call($session, $getEntropy);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage("Unexpected response, expecting Features, got BitWasp\\TrezorProto\\Success");
-
-        $initService->call($session, $initialize);
+        $this->assertInstanceOf(Entropy::class, $entropy);
+        $this->assertEquals($retData, $entropy->getEntropy()->getContents());
     }
 
-    public function testReturnsFeatures()
+    public function testReturnsWrongType()
     {
         $features = new Features();
 
@@ -85,11 +92,13 @@ class InitializeServiceTest extends TestCase
         $session = new Session($client, $device, '1');
 
         $reqFactory = new RequestFactory();
-        $initialize = $reqFactory->initialize();
+        $getEntropy = $reqFactory->getEntropy(32);
 
-        $initService = new InitializeService();
-        $features = $initService->call($session, $initialize);
+        $getEntropyService = new GetEntropyService();
 
-        $this->assertInstanceOf(Features::class, $features);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("Unexpected message returned, expecting Entropy");
+
+        $getEntropyService->call($session, $getEntropy);
     }
 }
