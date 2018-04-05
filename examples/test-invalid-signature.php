@@ -8,7 +8,7 @@ use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\VerifyMessageService;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -42,7 +42,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
 
 $toSign = "this is my message!";
 
-$currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
+$currentPinInput = new CurrentPinInput(new CommandLineUserInputRequest());
 $verifyMsgService = new VerifyMessageService();
 
 $address = "1HksNAfGmaMYAAzidJcAdgfjXy89ajYWpD";

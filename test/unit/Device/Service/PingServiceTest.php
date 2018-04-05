@@ -17,7 +17,7 @@ use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInput;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
 use BitWasp\TrezorProto\Features;

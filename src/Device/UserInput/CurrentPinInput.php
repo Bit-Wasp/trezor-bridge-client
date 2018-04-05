@@ -18,8 +18,6 @@ class CurrentPinInput implements CurrentPinInputInterface
 
     public function getPin(): string
     {
-        echo "It's your safe and trusted pin entry!\n";
-        echo "Enter your pin to proceed: ";
-        return trim($this->inputRequest->getInput());
+        return trim($this->inputRequest->getInput("It's your safe and trusted pin entry!\nEnter your pin to proceed: "));
     }
 }

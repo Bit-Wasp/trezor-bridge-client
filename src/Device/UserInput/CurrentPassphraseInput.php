@@ -18,8 +18,6 @@ class CurrentPassphraseInput implements CurrentPassphraseInputInterface
 
     public function getPassphrase(): string
     {
-        echo "It's your safe and trusted pin entry!\n";
-        echo "Enter your passphrase to proceed: ";
-        return trim($this->inputRequest->getInput());
+        return trim($this->inputRequest->getInput("It's your safe and trusted pin entry!\nEnter your passphrase to proceed: "));
     }
 }

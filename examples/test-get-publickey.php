@@ -8,7 +8,7 @@ use BitWasp\Trezor\Device\Command\GetPublicKeyService;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -44,7 +44,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
     throw new \RuntimeException("Failed to find requested network ({$useNetwork})");
 }
 
-$currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
+$currentPinInput = new CurrentPinInput(new CommandLineUserInputRequest());
 $publicKeyService = new GetPublicKeyService();
 $getPublicKey = $reqFactory->getPublicKey($btcNetwork->getCoinName(), [1], false);
 $publicKey = $publicKeyService->call($session, $currentPinInput, $getPublicKey);

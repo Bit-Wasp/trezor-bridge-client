@@ -14,7 +14,7 @@ use BitWasp\Trezor\Device\Command\GetAddressService;
 use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\TrezorProto\Address;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
@@ -49,7 +49,7 @@ class GetAddressTest extends TestCase
         $getAddress = $reqFactory->getAddress('Bitcoin', $path, InputScriptType::SPENDADDRESS(), false);
 
         $getAddressService = new GetAddressService();
-        $pinInput = new CurrentPinInput(new FgetsUserInputRequest());
+        $pinInput = new CurrentPinInput(new CommandLineUserInputRequest());
         $address = $getAddressService->call($session, $pinInput, $getAddress);
 
         $this->assertInstanceOf(Address::class, $address);
@@ -186,7 +186,7 @@ class GetAddressTest extends TestCase
         $path = [44|0x80000000, 0|0x80000000, 0|0x80000000, 0, 0];
         $getAddress = $reqFactory->getAddress('Bitcoin', $path, InputScriptType::SPENDADDRESS(), false);
 
-        $pinInput = new CurrentPinInput(new FgetsUserInputRequest());
+        $pinInput = new CurrentPinInput(new CommandLineUserInputRequest());
         $getPublicKeyService = new GetAddressService();
 
         $this->expectException(UnexpectedResultException::class);

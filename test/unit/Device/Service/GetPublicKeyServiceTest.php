@@ -14,7 +14,7 @@ use BitWasp\Trezor\Device\Command\GetPublicKeyService;
 use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\HDNodeType;
 use BitWasp\TrezorProto\MessageType;
@@ -54,7 +54,7 @@ class GetPublicKeyServiceTest extends TestCase
         $reqFactory = new RequestFactory();
         $getPublicKey = $reqFactory->getPublicKey('Bitcoin', $path, false);
 
-        $pinInput = new CurrentPinInput(new FgetsUserInputRequest());
+        $pinInput = new CurrentPinInput(new CommandLineUserInputRequest());
         $getPublicKeyService = new GetPublicKeyService();
         $success = $getPublicKeyService->call($session, $pinInput, $getPublicKey);
 
@@ -130,7 +130,7 @@ class GetPublicKeyServiceTest extends TestCase
         $path = [44|0x80000000, 0|0x80000000, 0|0x80000000, 0, 0];
         $getPublicKey = $reqFactory->getPublicKey('Bitcoin', $path, false);
 
-        $pinInput = new CurrentPinInput(new FgetsUserInputRequest());
+        $pinInput = new CurrentPinInput(new CommandLineUserInputRequest());
         $getPublicKeyService = new GetPublicKeyService();
 
         $this->expectException(UnexpectedResultException::class);

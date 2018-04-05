@@ -9,7 +9,7 @@ use BitWasp\Trezor\Device\Command\PingService;
 use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInput;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -43,7 +43,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
 
 $pingService = new PingService();
 
-$userInput = new FgetsUserInputRequest();
+$userInput = new CommandLineUserInputRequest();
 $pinInput = new CurrentPinInput($userInput);
 $passInput = new CurrentPassphraseInput($userInput);
 
