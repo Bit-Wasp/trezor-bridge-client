@@ -24,12 +24,11 @@ abstract class DeviceService
         }
     }
 
-    protected function confirmWithButton(ButtonRequest $request, int $expectType): Message
+    protected function confirmWithButton(ButtonRequest $request, ButtonRequestType $buttonType): Message
     {
         $theirType = $request->getCode();
-        if ($theirType->value() !== $expectType) {
-            $ourType = ButtonRequestType::valueOf($expectType)->name();
-            throw new \RuntimeException("Unexpected button request (expected: {$ourType}, got {$theirType->name()})");
+        if ($theirType->value() !== $buttonType->value()) {
+            throw new \RuntimeException("Unexpected button request (expected: {$buttonType->name()}, got {$theirType->name()})");
         }
 
         return Message::buttonAck(new ButtonAck());

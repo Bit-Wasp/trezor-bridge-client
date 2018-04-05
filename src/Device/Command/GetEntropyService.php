@@ -21,7 +21,7 @@ class GetEntropyService extends DeviceService
 
         $proto = $session->sendMessage(Message::getEntropy($getEntropy));
         if ($proto instanceof ButtonRequest) {
-            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall()));
         }
 
         if (!($proto instanceof Entropy)) {

@@ -23,7 +23,7 @@ class SignMessageService extends DeviceService
     ): MessageSignature {
         $proto = $session->sendMessage(Message::signMessage($message));
         if ($proto instanceof ButtonRequest) {
-            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall()));
         }
 
         if ($proto instanceof PinMatrixRequest) {

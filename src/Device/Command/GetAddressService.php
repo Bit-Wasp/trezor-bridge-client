@@ -25,7 +25,7 @@ class GetAddressService extends DeviceService
 
         if ($getAddress->getShowDisplay()) {
             while ($proto instanceof TrezorProto\ButtonRequest) {
-                $proto = $session->sendMessage($this->confirmWithButton($proto, TrezorProto\ButtonRequestType::ButtonRequest_Other_VALUE));
+                $proto = $session->sendMessage($this->confirmWithButton($proto, TrezorProto\ButtonRequestType::ButtonRequest_Other()));
             }
         }
 

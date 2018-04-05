@@ -20,12 +20,12 @@ class VerifyMessageService extends DeviceService
 
         if ($proto instanceof ButtonRequest) {
             // allow user to verify address
-            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Other_VALUE));
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Other()));
         }
 
         if ($proto instanceof ButtonRequest) {
             // allow user to verify message
-            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Other_VALUE));
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Other()));
         }
 
         if (!($proto instanceof Success)) {
