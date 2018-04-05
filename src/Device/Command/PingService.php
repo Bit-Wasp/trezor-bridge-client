@@ -36,7 +36,7 @@ class PingService extends DeviceService
         $proto = $session->sendMessage(Message::ping($ping));
         if ($proto instanceof ButtonRequest) {
             // allow user to accept with the button
-            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall_VALUE));
+            $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall()));
         }
 
         if ($ping->hasPinProtection()) {
