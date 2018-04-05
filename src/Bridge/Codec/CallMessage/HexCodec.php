@@ -9,19 +9,19 @@ use Psr\Http\Message\StreamInterface;
 
 class HexCodec
 {
-    /**
-     * Implement integer comparison
-     * Returns: 0 if  $a === $b
-     *         -1 if  $a  <  $b
-     *         +1 if  $a  >  $b
-     *
-     * @param int $a
-     * @param int $b
-     * @return int
-     */
     private function intcmp(int $a, int $b): int
     {
         return ($a < $b) ? -1 : (($a > $b) ? 1 : 0);
+    }
+
+    private function hex2bin(StreamInterface $stream): \Protobuf\Stream
+    {
+        $hex = $stream->getContents();
+        if (!ctype_xdigit($hex)) {
+            throw new InvalidMessageException("Invalid hex as input");
+        }
+
+        return \Protobuf\Stream::fromString(pack("H*", $hex));
     }
 
     public function parsePayload(StreamInterface $stream): array
@@ -30,17 +30,10 @@ class HexCodec
             throw new InvalidMessageException("Malformed data (size too small)");
         }
 
-        $hex = $stream->getContents();
-        if (!ctype_xdigit($hex)) {
-            throw new InvalidMessageException("Invalid hex as input");
-        }
+        $stream = $this->hex2bin($stream);
 
-        $stream = \Protobuf\Stream::fromString(pack("H*", $hex));
-
-        list ($type) = array_values(unpack('n', $stream->read(2)));
-        $stream->seek(2);
-
-        list ($size) = array_values(unpack('N', $stream->read(4)));
+        // relies on php returning the variables in order defined in unpack string
+        list ($type, $size) = array_values(unpack('n1type/N1size', $stream->read(6)));
         $stream->seek(6);
 
         $lCmp = $this->intcmp($stream->getSize() - 6, $size);
@@ -56,13 +49,6 @@ class HexCodec
     public function encode(int $messageType, \Protobuf\Message $protobuf): string
     {
         $stream = $protobuf->toStream();
-        return unpack(
-            'H*',
-            sprintf(
-                "%s%s",
-                pack('nN', $messageType, $stream->getSize()),
-                $stream->getContents()
-            )
-        )[1];
+        return unpack('H*', pack('nN', $messageType, $stream->getSize()) . $stream->getContents())[1];
     }
 }
