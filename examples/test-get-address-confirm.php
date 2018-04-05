@@ -6,7 +6,7 @@ use BitWasp\Trezor\Device\Command\GetAddressService;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 use BitWasp\Trezor\Device\RequestFactory;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\Trezor\Device\Util;
 
 require __DIR__ . "/../vendor/autoload.php";
@@ -42,7 +42,7 @@ if (!($btcNetwork = Util::networkByCoinShortcut($useNetwork, $features))) {
     throw new \RuntimeException("Failed to find requested network ({$useNetwork})");
 }
 
-$currentPinInput = new CurrentPinInput(new FgetsUserInputRequest());
+$currentPinInput = new CurrentPinInput(new CommandLineUserInputRequest());
 $addressService = new GetAddressService();
 $getAddress = $reqFactory->getP2shWitnessKeyHashAddress($btcNetwork->getCoinName(), [1], true);
 $address = $addressService->call($session, $currentPinInput, $getAddress);

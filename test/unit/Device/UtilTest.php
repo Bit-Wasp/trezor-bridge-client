@@ -13,7 +13,6 @@ class UtilTest extends TestCase
 {
     public function testFindNetworkByCoinName()
     {
-        $findCoin = "Bitcoin";
         $coinNames = ['Bitcoin', 'Litecoin', 'Dogecoin', 'Zcash'];
         $coinTypes = [];
         foreach ($coinNames as $coinName) {

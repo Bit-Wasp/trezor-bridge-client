@@ -14,7 +14,7 @@ use BitWasp\Trezor\Device\Command\SignMessageService;
 use BitWasp\Trezor\Device\Exception\UnexpectedResultException;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
-use BitWasp\Trezor\Device\UserInput\FgetsUserInputRequest;
+use BitWasp\Trezor\Device\UserInput\CommandLineUserInputRequest;
 use BitWasp\TrezorProto\ButtonRequest;
 use BitWasp\TrezorProto\ButtonRequestType;
 use BitWasp\TrezorProto\Features;
@@ -46,7 +46,7 @@ class SignMessageServiceTest extends TestCase
         $msg = "some message";
         $signMsg = $reqFactory->signMessagePubKeyHash('Bitcoin', [44|0x80000000, 0|0x80000000, 0|0x80000000, 0, 0], $msg);
 
-        $currentPin = new CurrentPinInput(new FgetsUserInputRequest());
+        $currentPin = new CurrentPinInput(new CommandLineUserInputRequest());
         $signMsgService = new SignMessageService();
 
         $this->expectException(UnexpectedResultException::class);
