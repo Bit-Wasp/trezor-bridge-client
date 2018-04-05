@@ -81,7 +81,7 @@ class SignMessageServiceTest extends TestCase
         $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
         $session = new Session($client, $device, '1');
         $reqFactory = new RequestFactory();
-        $msg = "some message";
+        $msg = "this is my message!";
         $signMsg = $reqFactory->signMessagePubKeyHash('Bitcoin', [44|0x80000000, 0|0x80000000, 0|0x80000000, 0, 0], $msg);
 
         $currentPin = $this->getMockSinglePinInput('123456');
