@@ -8,7 +8,6 @@ use BitWasp\Test\Trezor\MockHttpStack;
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
-use BitWasp\Trezor\Bridge\Http\HttpClient;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Bridge\Session;
 use BitWasp\Trezor\Device\Command\GetPublicKeyService;
@@ -22,11 +21,7 @@ use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PinMatrixRequest;
 use BitWasp\TrezorProto\PinMatrixRequestType;
 use BitWasp\TrezorProto\PublicKey;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
-use Psr\Http\Message\RequestInterface;
 
 class GetPublicKeyServiceTest extends TestCase
 {
