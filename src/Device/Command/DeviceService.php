@@ -9,7 +9,7 @@ use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInputInterface;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInputInterface;
 use BitWasp\TrezorProto\ButtonAck;
 use BitWasp\TrezorProto\ButtonRequest;
-use BitWasp\TrezorProto\MessageType;
+use BitWasp\TrezorProto\ButtonRequestType;
 use BitWasp\TrezorProto\PassphraseAck;
 use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\PinMatrixRequest;
@@ -21,7 +21,7 @@ abstract class DeviceService
     {
         if ($pinRequest->getType()->value() !== $expectedType) {
             $ourType = PinMatrixRequestType::valueOf($expectedType);
-            throw new \Exception("Unexpected pin matrix type (was {$pinRequest->getType()->name()}, not expected type {$ourType->name()}");
+            throw new \RuntimeException("Unexpected pin matrix type (was {$pinRequest->getType()->name()}, not expected type {$ourType->name()})");
         }
     }
 
@@ -29,8 +29,8 @@ abstract class DeviceService
     {
         $theirType = $request->getCode();
         if ($theirType->value() !== $expectType) {
-            $ourType = MessageType::valueOf($expectType)->name();
-            throw new \RuntimeException("Unexpected button request (expected: {$ourType}, got {$theirType->name()}");
+            $ourType = ButtonRequestType::valueOf($expectType)->name();
+            throw new \RuntimeException("Unexpected button request (expected: {$ourType}, got {$theirType->name()})");
         }
 
         return Message::buttonAck(new ButtonAck());
