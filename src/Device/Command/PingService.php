@@ -22,35 +22,23 @@ class PingService extends DeviceService
     public function call(
         Session $session,
         Ping $ping,
-        CurrentPinInputInterface $pinInput = null,
-        CurrentPassphraseInputInterface $passphraseInput = null
+        CurrentPinInputInterface $pinInput,
+        CurrentPassphraseInputInterface $passphraseInput
     ): Success {
-        if ($ping->hasPinProtection() && $ping->getPinProtection() && $pinInput === null) {
-            throw new \InvalidArgumentException("Missing pin input");
-        }
-
-        if ($ping->hasPassphraseProtection() && $ping->getPassphraseProtection() && $passphraseInput === null) {
-            throw new \InvalidArgumentException("Missing passphrase input");
-        }
-
         $proto = $session->sendMessage(Message::ping($ping));
         if ($proto instanceof ButtonRequest) {
             // allow user to accept with the button
             $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_ProtectCall()));
         }
 
-        if ($ping->hasPinProtection()) {
-            // allow user to accept with their pin
-            if ($proto instanceof PinMatrixRequest) {
-                $proto = $session->sendMessage($this->provideCurrentPin($proto, $pinInput));
-            }
+        // allow user to accept with their pin
+        if ($proto instanceof PinMatrixRequest) {
+            $proto = $session->sendMessage($this->provideCurrentPin($proto, $pinInput));
         }
 
-        if ($ping->hasPassphraseProtection()) {
-            // allow user to accept with their passphrase
-            if ($proto instanceof PassphraseRequest) {
-                $proto = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
-            }
+        // allow user to accept with their passphrase
+        if ($proto instanceof PassphraseRequest) {
+            $proto = $session->sendMessage($this->provideCurrentPassphrase($passphraseInput));
         }
 
         if (!($proto instanceof Success)) {

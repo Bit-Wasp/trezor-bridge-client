@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor;
 
+use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInput;
 use BitWasp\Trezor\Device\UserInput\CurrentPinInput;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
@@ -29,6 +30,21 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         return $device;
     }
 
+    public function getMockPwInput(string $pw, int $numEntries = 1)
+    {
+        $pinInputBuilder = $this
+            ->getMockBuilder(CurrentPassphraseInput::class)
+            ->disableOriginalConstructor()
+        ;
+
+        $pwInput = $pinInputBuilder->getMock();
+        $pwInput->expects($this->exactly($numEntries))
+            ->method('getPassphrase')
+            ->willReturn($pw)
+        ;
+
+        return $pwInput;
+    }
     /**
      * @param string $pin
      * @param int $numEntries
