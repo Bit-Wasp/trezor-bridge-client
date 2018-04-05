@@ -17,7 +17,6 @@ class VerifyMessageService extends DeviceService
     public function call(Session $session, VerifyMessage $message): Success
     {
         $proto = $session->sendMessage(Message::verifyMessage($message));
-
         if ($proto instanceof ButtonRequest) {
             // allow user to verify address
             $proto = $session->sendMessage($this->confirmWithButton($proto, ButtonRequestType::ButtonRequest_Other()));

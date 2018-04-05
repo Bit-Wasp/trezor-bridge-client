@@ -33,40 +33,6 @@ use GuzzleHttp\Psr7\Response;
 
 class PingServiceTest extends TestCase
 {
-    public function testPinRequestedButWithoutPinInput()
-    {
-        $reqFactory = new RequestFactory();
-        $ping = $reqFactory->ping('abcd1234nonce', false, true, false);
-
-        $pingService = new PingService();
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/");
-        $client = new Client($httpClient);
-        $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
-        $session = new Session($client, $device, '1');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Missing pin input");
-        $pingService->call($session, $ping, null, new CurrentPassphraseInput(new FgetsUserInputRequest()));
-    }
-    public function testPassphraseRequestedButWithoutPassphraseInput()
-    {
-        $reqFactory = new RequestFactory();
-        $ping = $reqFactory->ping('abcd1234nonce', false, false, true);
-
-        $pingService = new PingService();
-
-        $httpClient = HttpClient::forUri("http://localhost:21325/");
-        $client = new Client($httpClient);
-        $device = new Device($this->createDevice('hidabcd1234', 21325, 1));
-        $session = new Session($client, $device, '1');
-
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Missing passphrase input");
-
-        $pingService->call($session, $ping, new CurrentPinInput(new FgetsUserInputRequest()), null);
-    }
-
     public function testNoPromptButWrongResultType()
     {
         $wrongMsg = new Features();
@@ -87,11 +53,13 @@ class PingServiceTest extends TestCase
         $ping = $reqFactory->ping('abcd1234nonce', false, false, false);
 
         $pingService = new PingService();
+        $pinInput = $this->getMockSinglePinInput('1234', 0);
+        $pwInput = $this->getMockPwInput('securepassword', 0);
 
         $this->expectException(UnexpectedResultException::class);
         $this->expectExceptionMessage("Unexpected response, expecting Success, got BitWasp\\TrezorProto\\Features");
 
-        $pingService->call($session, $ping);
+        $pingService->call($session, $ping, $pinInput, $pwInput);
     }
 
     public function testNoPromptButWrongNonce()
@@ -115,10 +83,12 @@ class PingServiceTest extends TestCase
         $ping = $reqFactory->ping('abcd1234nonce', false, false, false);
 
         $pingService = new PingService();
+        $pinInput = $this->getMockSinglePinInput('1234', 0);
+        $pwInput = $this->getMockPwInput('securepassword', 0);
 
         $this->expectException(IncorrectNonceException::class);
 
-        $pingService->call($session, $ping);
+        $pingService->call($session, $ping, $pinInput, $pwInput);
     }
 
     public function testNoPrompt()
@@ -142,7 +112,10 @@ class PingServiceTest extends TestCase
         $ping = $reqFactory->ping('abcd1234nonce', false, false, false);
 
         $pingService = new PingService();
-        $success = $pingService->call($session, $ping);
+        $pinInput = $this->getMockSinglePinInput('1234', 0);
+        $pwInput = $this->getMockPwInput('securepassword', 0);
+
+        $success = $pingService->call($session, $ping, $pinInput, $pwInput);
 
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
@@ -173,7 +146,10 @@ class PingServiceTest extends TestCase
         $ping = $reqFactory->ping('abcd1234nonce', true, false, false);
 
         $pingService = new PingService();
-        $success = $pingService->call($session, $ping);
+        $pinInput = $this->getMockSinglePinInput('1234', 0);
+        $pwInput = $this->getMockPwInput('securepassword', 0);
+
+        $success = $pingService->call($session, $ping, $pinInput, $pwInput);
 
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
@@ -197,7 +173,7 @@ class PingServiceTest extends TestCase
         // not much to test in button ack
     }
 
-    public function testRequirepin()
+    public function testRequirePin()
     {
         $pinRequest = new PinMatrixRequest();
         $pinRequest->setType(PinMatrixRequestType::PinMatrixRequestType_Current());
@@ -221,18 +197,11 @@ class PingServiceTest extends TestCase
         $reqFactory = new RequestFactory();
         $ping = $reqFactory->ping('abcd1234nonce', false, true, false);
 
-        $pinInputBuilder = $this
-            ->getMockBuilder(CurrentPinInput::class)
-            ->disableOriginalConstructor()
-        ;
-
-        $pinInput = $pinInputBuilder->getMock();
-        $pinInput->expects($this->once())
-            ->method('getPin')
-            ->willReturn('123456');
+        $pinInput = $this->getMockSinglePinInput('1234', 1);
+        $pwInput = $this->getMockPwInput('securepassword', 0);
 
         $pingService = new PingService();
-        $success = $pingService->call($session, $ping, $pinInput);
+        $success = $pingService->call($session, $ping, $pinInput, $pwInput);
 
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
@@ -254,7 +223,7 @@ class PingServiceTest extends TestCase
         list ($req2Type, $req2Msg) = $codec->parsePayload($req2->getBody());
         $this->assertEquals(MessageType::MessageType_PinMatrixAck()->value(), $req2Type);
         $sentPinMatrix = new PinMatrixAck($req2Msg);
-        $this->assertEquals('123456', $sentPinMatrix->getPin());
+        $this->assertEquals('1234', $sentPinMatrix->getPin());
     }
 
     public function testRequirePassphrase()
@@ -280,18 +249,10 @@ class PingServiceTest extends TestCase
         $reqFactory = new RequestFactory();
         $ping = $reqFactory->ping('abcd1234nonce', false, false, true);
 
-        $pinInputBuilder = $this
-            ->getMockBuilder(CurrentPassphraseInput::class)
-            ->disableOriginalConstructor()
-        ;
-
-        $pwInput = $pinInputBuilder->getMock();
-        $pwInput->expects($this->once())
-            ->method('getPassphrase')
-            ->willReturn('thisisanawesomepassword');
-
         $pingService = new PingService();
-        $success = $pingService->call($session, $ping, null, $pwInput);
+        $pinInput = $this->getMockSinglePinInput('1234', 0);
+        $pwInput = $this->getMockPwInput('thisisanawesomepassword', 1);
+        $success = $pingService->call($session, $ping, $pinInput, $pwInput);
 
         $this->assertInstanceOf(Success::class, $success);
         $this->assertEquals('abcd1234nonce', $success->getMessage());
