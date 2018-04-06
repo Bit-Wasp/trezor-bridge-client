@@ -1,10 +1,12 @@
 language: php
-
+dist: trusty
 php:
  - 7.0
  - 7.1
  - 7.2
- - nightly
+
+services:
+ - docker
 
 branches:
   only:
@@ -13,14 +15,20 @@ branches:
 env:
   matrix:
     - PHPUNIT=true
-
+addons:
+  apt:
+    packages:
+      - libsdl2-dev
+      - libhidapi-dev
+      - libudev-dev
+      - libusb-1.0-0-dev
 matrix:
   exclude:
     - php: 7.2
       env: PHPUNIT=true
   include:
     - php: 7.2
-      env: PHPUNIT=true COVERAGE=true CODE_STYLE=true
+      env: PHPUNIT=true COVERAGE=true CODE_STYLE=true INTEGRATION=true
 
 install:
  - composer install
@@ -28,11 +36,20 @@ install:
 before_script:
  - if [ "${COVERAGE}" != "true" ] && [ "$TRAVIS_PHP_VERSION" != "hhvm" ] && [ "$TRAVIS_PHP_VERSION" != "nightly" ]; then phpenv config-rm xdebug.ini && echo "xdebug disabled"; fi
 
-script:
- - tool/run_phpunit_tests.sh
- - tool/run_codestyle_tests.sh
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - sleep 3 # give xvfb some time to start
 
+script:
+ - if [ "${INTEGRATION}" = "true" ]; then
+     eval $(gimme 1.9);
+   fi
+ - tool/run_phpunit_tests.sh
+ - tool/run_integration_tests.sh
+ - tool/run_codestyle_tests.sh
+ - if [ "${INTEGRATION}" = "true" ]; then
+     cat /tmp/trezor-bridge;
+   fi
 after_success:
  - if [ "${COVERAGE}" = "true" ]; then make scrutinizer; fi
-
-
