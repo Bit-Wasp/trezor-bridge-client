@@ -6,7 +6,7 @@ namespace BitWasp\Trezor\Device\UserInput;
 
 use BitWasp\Trezor\Device\Exception\UserInputDisabledException;
 
-class DisabledUserInputRequest
+class DisabledUserInputRequest extends UserInputRequest
 {
     public function getInput(string $message): string
     {

@@ -17,7 +17,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "BitWasp\\Test\\Trezor\\": "test/unit"
+      "BitWasp\\Test\\Trezor\\": "test/unit",
+      "BitWasp\\Test\\Trezor\\Device\\": "test/device"
     }
   },
   "require": {
