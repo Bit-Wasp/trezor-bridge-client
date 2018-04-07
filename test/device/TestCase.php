@@ -25,7 +25,11 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     public function getEmulatorPath(): string
     {
-        return "{$this->getRootPath()}tool/emulator/trezor-mcu/build/trezor-emulator64-master";
+        $path = getenv("EMULATOR_PATH");
+        if (!$path) {
+            throw new \RuntimeException("EMULATOR_PATH not set");
+        }
+        return $path;
     }
 
     public function getEmulatorStartCommand(): string
@@ -42,12 +46,11 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     }
     public function getBridgePath(): string
     {
-        $gopath = getenv('GOPATH');
-        if (!$gopath) {
-            throw new \RuntimeException('GOPATH not set');
+        $path = getenv("BRIDGE_PATH");
+        if (!$path) {
+            throw new \RuntimeException("BRIDGE_PATH not set");
         }
-
-        return "{$gopath}/bin/trezord-go";
+        return $path;
     }
 
     public function setUp()
