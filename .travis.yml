@@ -46,10 +46,8 @@ script:
      eval $(gimme 1.9);
    fi
  - tool/run_phpunit_tests.sh
- - tool/run_integration_tests.sh
+ - BRIDGE_PATH=$GOPATH/bin/trezord-go EMULATOR_PATH=tool/emulator/trezor-mcu/build/trezor-emulator64-master tool/run_integration_tests.sh
  - tool/run_codestyle_tests.sh
- - if [ "${INTEGRATION}" = "true" ]; then
-     cat /tmp/trezor-bridge;
-   fi
+
 after_success:
  - if [ "${COVERAGE}" = "true" ]; then make scrutinizer; fi
