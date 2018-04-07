@@ -31,7 +31,7 @@ matrix:
     - php: 7.2
       env: PHPUNIT=true COVERAGE=true CODE_STYLE=true
     - php: 7.2
-      env: INTEGRATION=true
+      env: INTEGRATION=true COVERAGE=true
 
 install:
  - composer install
