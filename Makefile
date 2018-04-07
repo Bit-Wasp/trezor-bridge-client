@@ -13,21 +13,22 @@ phpcbf: pretest
 
 pretest:
 		if [ ! -d vendor ] || [ ! -f composer.lock ]; then composer install; else echo "Already have dependencies"; fi
+		if [ ! -d build ]; then mkdir build; fi
 
-phpunit-ci: pretest
-		mkdir -p build
-		php ${EXT_PHP} vendor/bin/phpunit --coverage-text --coverage-clover=build/coverage.clover
+phpunit-ci-unit: pretest
+		php ${EXT_PHP} vendor/bin/phpunit -c phpunit.xml --coverage-text --coverage-clover=build/coverage.clover
+
+phpunit-ci-integration: pretest
+		php ${EXT_PHP} vendor/bin/phpunit -c phpunit.device.xml --coverage-text --coverage-clover=build/coverage-integration.clover
 
 ocular:
 		if [ ! -f ocular.phar ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
 
-ifdef OCULAR_TOKEN
-scrutinizer: ocular
-		@php ocular.phar code-coverage:upload --format=php-clover build/coverage.clover --access-token=$(OCULAR_TOKEN);
-else
-scrutinizer: ocular
-		php ocular.phar code-coverage:upload --format=php-clover build/coverage.clover;
-endif
+scrutinizer-unit: ocular
+		php ocular.phar code-coverage:upload --format=php-clover build/coverage.clover
+
+scrutinizer-integration: ocular
+		php ocular.phar code-coverage:upload --format=php-clover build/coverage-integration.clover
 
 clean: clean-env clean-deps
 
