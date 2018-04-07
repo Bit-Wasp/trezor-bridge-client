@@ -52,6 +52,5 @@ script:
  - BRIDGE_PATH=$GOPATH/bin/trezord-go EMULATOR_PATH=tool/emulator/trezor-mcu/build/trezor-emulator64-master tool/run_integration_tests.sh
  - tool/run_codestyle_tests.sh
 
-after_script:
-- if [ "${COVERAGE}" = "true" ] && [ "${PHPUNIT}" = "true" ] ; then make scrutinizer-unit; fi
-- if [ "${COVERAGE}" = "true" ] && [ "${INTEGRATION}" = "true" ] ; then make scrutinizer-integration; fi
+after_success:
+- if [ "${COVERAGE}" = "true" ] ; then make scrutinizer; fi
