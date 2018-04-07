@@ -18,3 +18,8 @@ It takes care of all the heavy lifting of speaking to a USB HID device, and expo
 # Contributing
 
 See our [contributors guide](CONTRIBUTORS.md) for more information
+
+# Testing
+
+The library has two test cases: mock tests, where the HTTP layer is mocked and tested.
+It also includes integration tests which run against a trezor emulator, and while running trezord-go.
