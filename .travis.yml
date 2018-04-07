@@ -22,13 +22,16 @@ addons:
       - libhidapi-dev
       - libudev-dev
       - libusb-1.0-0-dev
+
 matrix:
   exclude:
     - php: 7.2
       env: PHPUNIT=true
   include:
     - php: 7.2
-      env: PHPUNIT=true COVERAGE=true CODE_STYLE=true INTEGRATION=true
+      env: PHPUNIT=true COVERAGE=true CODE_STYLE=true
+    - php: 7.2
+      env: INTEGRATION=true COVERAGE=true
 
 install:
  - composer install
@@ -49,5 +52,6 @@ script:
  - BRIDGE_PATH=$GOPATH/bin/trezord-go EMULATOR_PATH=tool/emulator/trezor-mcu/build/trezor-emulator64-master tool/run_integration_tests.sh
  - tool/run_codestyle_tests.sh
 
-after_success:
- - if [ "${COVERAGE}" = "true" ]; then make scrutinizer; fi
+after_script:
+- if [ "${COVERAGE}" = "true" ] && [ "${PHPUNIT}" = "true" ] ; then make scrutinizer-unit; fi
+- if [ "${COVERAGE}" = "true" ] && [ "${INTEGRATION}" = "true" ] ; then make scrutinizer-integration; fi
