@@ -9,6 +9,7 @@ use BitWasp\Trezor\Bridge\Codec\CallMessage\HexCodec;
 use BitWasp\Trezor\Bridge\Exception\InactiveSessionException;
 use BitWasp\Trezor\Device\Exception\Failure\ActionCancelledException;
 use BitWasp\Trezor\Device\Message;
+use BitWasp\Trezor\Device\MessageBase;
 use BitWasp\TrezorProto\Failure;
 use BitWasp\TrezorProto\FailureType;
 use BitWasp\TrezorProto\Features;
@@ -18,7 +19,6 @@ use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PublicKey;
 use GuzzleHttp\Psr7\Response;
-
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Bridge\Client;
 use BitWasp\Trezor\Bridge\Http\HttpClient;

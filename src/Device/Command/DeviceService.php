@@ -44,7 +44,6 @@ abstract class DeviceService
         return Message::pinMatrixAck($pinMatrixAck);
     }
 
-
     protected function provideCurrentPassphrase(CurrentPassphraseInputInterface $passphraseInput): Message
     {
         $passphraseAck = new PassphraseAck();

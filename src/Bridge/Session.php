@@ -8,7 +8,9 @@ use BitWasp\Trezor\Bridge\Exception\InactiveSessionException;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Device\Exception\FailureException;
 use BitWasp\Trezor\Device\Message;
+use BitWasp\Trezor\Device\MessageBase;
 use BitWasp\TrezorProto\Failure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Protobuf\Message as ProtoMessage;
 
 class Session
@@ -91,22 +93,38 @@ class Session
     {
         return $this->device;
     }
-
     /**
-     * @param Message $message
+     * @param MessageBase $message
      * @return ProtoMessage
      * @throws FailureException
      * @throws InactiveSessionException
      */
-    public function sendMessage(Message $message): ProtoMessage
+    public function sendMessageAsync(MessageBase $request, array $headers = []): PromiseInterface
     {
         $this->assertSessionIsActive();
-        $message = $this->client->call($this->getSessionId(), $message);
-        $proto = $message->getProto();
-        if ($proto instanceof Failure) {
-            FailureException::handleFailure($proto);
-        }
+        fwrite(STDERR, "(sending {$request->getType()})\n");
+        return $this->client->callAsync($this->getSessionId(), $request, $headers)
+            ->then(function (Message $message) use ($request) {
+                fwrite(STDERR, "(for {$request->getType()}) got message back {$message->getType()})\n");
+                $proto = $message->getProto();
+                if ($proto instanceof Failure) {
+                    fwrite(STDERR, "(failure {$request->getType()}) got message back {$message->getType()})\n");
+                    FailureException::handleFailure($proto);
+                }
 
-        return $proto;
+                return $proto;
+            });
+    }
+    /**
+     * @param MessageBase $message
+     * @return ProtoMessage
+     * @throws FailureException
+     * @throws InactiveSessionException
+     */
+    public function sendMessage(MessageBase $message): ProtoMessage
+    {
+        $this->assertSessionIsActive();
+        return $this->sendMessageAsync($message)
+            ->wait(true);
     }
 }

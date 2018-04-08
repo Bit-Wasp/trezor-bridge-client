@@ -36,7 +36,7 @@ class ClientTest extends TestCase
     public function testAcquireAndRelease()
     {
         $devices = $this->client->listDevices();
-        $this->assertCount(1, $devices);
+        $this->assertCount(2, $devices);
         $this->assertEquals("emulator21324", $devices->devices()[0]->getPath());
         $this->assertEquals(null, $devices->devices()[0]->getSession());
 
@@ -47,7 +47,7 @@ class ClientTest extends TestCase
         $this->assertFalse($session->isActive());
 
         $devices = $this->client->listDevices();
-        $this->assertCount(1, $devices);
+        $this->assertCount(2, $devices);
         $this->assertEquals("emulator21324", $devices->devices()[0]->getPath());
         $this->assertEquals(null, $devices->devices()[0]->getSession());
     }

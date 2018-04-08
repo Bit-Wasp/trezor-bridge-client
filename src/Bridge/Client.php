@@ -12,7 +12,8 @@ use BitWasp\Trezor\Bridge\Message\ListenResponse;
 use BitWasp\Trezor\Bridge\Message\VersionResponse;
 use BitWasp\Trezor\Bridge\Schema\ValidatorFactory;
 use BitWasp\Trezor\Bridge\Http\HttpClient;
-use BitWasp\Trezor\Device\Message;
+use BitWasp\Trezor\Device\MessageBase;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class Client
@@ -147,8 +148,13 @@ class Client
         return true;
     }
 
-    public function call(string $sessionId, Message $message): Message
+    public function call(string $sessionId, MessageBase $message): MessageBase
     {
         return $this->client->call($sessionId, $message);
+    }
+
+    public function callAsync(string $sessionId, MessageBase $message, array $headers): PromiseInterface
+    {
+        return $this->client->callAsync($sessionId, $message, $headers);
     }
 }
