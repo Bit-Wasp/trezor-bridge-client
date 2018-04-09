@@ -10,5 +10,5 @@ use BitWasp\TrezorProto\ButtonRequestType;
 
 abstract class ButtonAck
 {
-    abstract function acknowledge(Session $session, ButtonRequest $request, ButtonRequestType $allowType);
+    abstract public function acknowledge(Session $session, ButtonRequest $request, ButtonRequestType $allowType);
 }

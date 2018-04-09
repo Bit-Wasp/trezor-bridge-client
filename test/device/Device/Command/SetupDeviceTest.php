@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor\Device\Device\Command;
 
+use BitWasp\Trezor\Device\Button\DebugButtonAck;
 use BitWasp\Trezor\Device\Command\LoadDeviceService;
 use BitWasp\Trezor\Device\RequestFactory;
 use BitWasp\TrezorProto\Success;
@@ -23,7 +24,9 @@ class SetupServiceTest extends CommandTest
         $hdNode = $reqFactory->privateHdNode($depth, $fingerprint, $numChild, $chainCode, $privateKey);
         $loadDevice = $reqFactory->loadDeviceWithHdNode($hdNode, $language);
 
-        $loadDeviceService = new LoadDeviceService();
+        $debugSession = $this->client->acquire($this->devices[1]);
+        $debugBtnAck = new DebugButtonAck($debugSession, true);
+        $loadDeviceService = new LoadDeviceService($debugBtnAck);
         $success = $loadDeviceService->call($this->session, $loadDevice);
         $this->assertInstanceOf(Success::class, $success);
     }

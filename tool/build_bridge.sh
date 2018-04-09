@@ -8,8 +8,12 @@ if [ ! -d $GOPATH/src/github.com/trezor/trezord-go ]; then
     mkdir -p $GOPATH/src/github.com/trezor/trezord-go
     cd $GOPATH/src/github.com/trezor/trezord-go
     git init
-    git remote add bit-wasp https://github.com/bit-wasp/trezord-go
-    git fetch bit-wasp nousb
-    git checkout bit-wasp/nousb
+    #git remote add bit-wasp https://github.com/bit-wasp/trezord-go
+    #git fetch bit-wasp nousb
+    #git checkout bit-wasp/nousb
+
+    git remote add origin https://github.com/trezor/trezord-go
+    git fetch origin not_read
+    git checkout not_read
     go install .
 fi

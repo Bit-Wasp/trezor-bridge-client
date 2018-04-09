@@ -11,7 +11,6 @@ use BitWasp\Trezor\Device\Message;
 use BitWasp\Trezor\Device\MessageBase;
 use BitWasp\TrezorProto\Failure;
 use GuzzleHttp\Promise\PromiseInterface;
-use Protobuf\Message as ProtoMessage;
 
 class Session
 {
@@ -93,38 +92,46 @@ class Session
     {
         return $this->device;
     }
+
     /**
-     * @param MessageBase $message
-     * @return ProtoMessage
-     * @throws FailureException
-     * @throws InactiveSessionException
+     * @param MessageBase $request
+     * @return PromiseInterface
      */
-    public function sendMessageAsync(MessageBase $request, array $headers = []): PromiseInterface
+    public function sendMessageAsync(MessageBase $request): PromiseInterface
     {
         $this->assertSessionIsActive();
-        fwrite(STDERR, "(sending {$request->getType()})\n");
-        return $this->client->callAsync($this->getSessionId(), $request, $headers)
-            ->then(function (Message $message) use ($request) {
-                fwrite(STDERR, "(for {$request->getType()}) got message back {$message->getType()})\n");
+        return $this->client->callAsync($this->getSessionId(), $request)
+            ->then(function (Message $message): \Protobuf\Message {
                 $proto = $message->getProto();
                 if ($proto instanceof Failure) {
-                    fwrite(STDERR, "(failure {$request->getType()}) got message back {$message->getType()})\n");
                     FailureException::handleFailure($proto);
                 }
 
                 return $proto;
             });
     }
+
     /**
      * @param MessageBase $message
-     * @return ProtoMessage
+     * @return \Protobuf\Message
      * @throws FailureException
      * @throws InactiveSessionException
      */
-    public function sendMessage(MessageBase $message): ProtoMessage
+    public function sendMessage(MessageBase $message): \Protobuf\Message
     {
         $this->assertSessionIsActive();
         return $this->sendMessageAsync($message)
             ->wait(true);
+    }
+
+    /**
+     * @param MessageBase $message
+     * @throws FailureException
+     * @throws InactiveSessionException
+     */
+    public function postMessage(MessageBase $message)
+    {
+        $this->assertSessionIsActive();
+        return $this->client->post($this->getSessionId(), $message);
     }
 }

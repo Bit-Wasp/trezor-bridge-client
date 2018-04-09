@@ -18,7 +18,6 @@ class HumanButtonAck extends ButtonAck
             throw new \RuntimeException("Unexpected button request (expected: {$expectedType->name()}, got {$theirType->name()})");
         }
 
-        echo "sending button ack\n";
         return $session->sendMessage(Message::buttonAck(new \BitWasp\TrezorProto\ButtonAck()));
     }
 }

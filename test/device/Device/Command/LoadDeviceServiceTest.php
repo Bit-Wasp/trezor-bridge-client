@@ -7,9 +7,7 @@ namespace BitWasp\Test\Trezor\Device\Device\Command;
 use BitWasp\Trezor\Device\Button\DebugButtonAck;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\Trezor\Device\Command\LoadDeviceService;
-use BitWasp\Trezor\Device\DebugMessage;
 use BitWasp\Trezor\Device\RequestFactory;
-use BitWasp\TrezorProto\DebugLinkStop;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\Success;
 
@@ -23,7 +21,10 @@ class LoadDeviceServiceTest extends CommandTest
         $reqFactory = new RequestFactory();
         $getAddress = $reqFactory->loadDeviceWithMnemonic($mnemonic, $language);
 
-        $loadDeviceService = new LoadDeviceService();
+        $debugSession = $this->client->acquire($this->devices[1]);
+        $buttonAck = new DebugButtonAck($debugSession, true);
+        $loadDeviceService = new LoadDeviceService($buttonAck);
+
         $success = $loadDeviceService->call($this->session, $getAddress);
     }*/
 
@@ -39,20 +40,15 @@ class LoadDeviceServiceTest extends CommandTest
         $reqFactory = new RequestFactory();
         $hdNode = $reqFactory->privateHdNode($depth, $fingerprint, $numChild, $chainCode, $privateKey);
         $loadDevice = $reqFactory->loadDeviceWithHdNode($hdNode, $language);
+
         $debugSession = $this->client->acquire($this->devices[1]);
-
-        $initService = new InitializeService();
-        $features = $initService->call($this->session, new Initialize());
-
-        $buttonAck = new DebugButtonAck($debugSession);
+        $buttonAck = new DebugButtonAck($debugSession, true);
         $loadDeviceService = new LoadDeviceService($buttonAck);
+        $initializeService = new InitializeService();
 
-        fwrite(STDERR, "firing load service\n");
-        $l1 = microtime(true);
+        $features = $initializeService->call($this->session, new Initialize());
+        $this->assertFalse($features->getInitialized());
         $success = $loadDeviceService->call($this->session, $loadDevice);
         $this->assertInstanceOf(Success::class, $success);
-
-        $stop = new DebugLinkStop();
-        $debugSession->sendMessageAsync(DebugMessage::stop($stop));
     }
 }

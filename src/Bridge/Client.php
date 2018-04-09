@@ -148,13 +148,18 @@ class Client
         return true;
     }
 
-    public function call(string $sessionId, MessageBase $message): MessageBase
+    public function post(string $sessionId, MessageBase $message)
+    {
+        return $this->client->post($sessionId, $message);
+    }
+
+    public function call(string $sessionId, MessageBase $message)
     {
         return $this->client->call($sessionId, $message);
     }
 
-    public function callAsync(string $sessionId, MessageBase $message, array $headers): PromiseInterface
+    public function callAsync(string $sessionId, MessageBase $message): PromiseInterface
     {
-        return $this->client->callAsync($sessionId, $message, $headers);
+        return $this->client->callAsync($sessionId, $message);
     }
 }

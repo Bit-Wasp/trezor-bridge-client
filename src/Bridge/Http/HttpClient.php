@@ -102,13 +102,31 @@ class HttpClient
         ]);
     }
 
+    public function post(string $sessionId, MessageBase $message)
+    {
+        $responsePromise = $this->postAsync($sessionId, $message);
+        return $responsePromise->wait(true);
+    }
+
     public function call(string $sessionId, MessageBase $message): Message
     {
         $responsePromise = $this->callAsync($sessionId, $message);
         return $responsePromise->wait(true);
     }
 
-    public function callAsync(string $sessionId, MessageBase $message, array $headers = [])
+    public function postAsync(string $sessionId, MessageBase $message)
+    {
+        static $prefixLen;
+        if (null === $prefixLen) {
+            $prefixLen = strlen("MessageType_");
+        }
+
+        return $this->client->postAsync("/post/{$sessionId}", [
+            'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
+        ]);
+    }
+
+    public function callAsync(string $sessionId, MessageBase $message)
     {
         static $prefixLen;
         if (null === $prefixLen) {
@@ -116,11 +134,9 @@ class HttpClient
         }
 
         return $this->client->postAsync("/call/{$sessionId}", [
-            'headers' => $headers,
             'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
         ])
-            ->then(function (Response $response) use ($prefixLen, $message) {
-                echo "got response back for ({$message->getType()})";
+            ->then(function (Response $response) use ($prefixLen): Message {
                 list ($type, $result) = $this->callCodec->parsePayload($response->getBody());
 
                 $messageType = MessageType::valueOf($type);
