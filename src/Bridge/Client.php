@@ -106,7 +106,7 @@ class Client
             $devices[] = new Device($device);
         }
 
-        return new ListDevicesResponse($devices);
+        return new ListDevicesResponse(...$devices);
     }
 
     public function listen(Device ...$devices): ListenResponse
@@ -121,7 +121,7 @@ class Client
             $devices[] = new Device($device);
         }
 
-        return new ListenResponse($devices);
+        return new ListenResponse(...$devices);
     }
 
     /**

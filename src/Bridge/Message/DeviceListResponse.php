@@ -14,14 +14,8 @@ abstract class DeviceListResponse implements \Countable
     /**
      * @param Device[] $devices
      */
-    public function __construct(array $devices)
+    public function __construct(Device... $devices)
     {
-        foreach ($devices as $device) {
-            if (!($device instanceof Device)) {
-                throw new \InvalidArgumentException();
-            }
-        }
-
         $this->devices = $devices;
     }
 
