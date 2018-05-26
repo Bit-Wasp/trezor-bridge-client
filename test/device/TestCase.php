@@ -23,7 +23,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         if (!($ver = getenv('TREZOR_BRIDGE_VERSION'))) {
             throw new \RuntimeException("Missing TREZOR_BRIDGE_VERSION");
         }
-        return $ver;
+        return substr($ver, 1);
     }
 
     public function getRootPath(): string

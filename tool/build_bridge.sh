@@ -1,9 +1,6 @@
 #!/bin/bash
 set -x
 cd $(git rev-parse --show-toplevel)/tool
-if [ ! -d ./bridge ]; then
-    mkdir bridge
-fi
 if [ ! -d $GOPATH/src/github.com/trezor/trezord-go ]; then
     mkdir -p $GOPATH/src/github.com/trezor/trezord-go
     cd $GOPATH/src/github.com/trezor/trezord-go
@@ -15,5 +12,6 @@ if [ ! -d $GOPATH/src/github.com/trezor/trezord-go ]; then
     git remote add origin https://github.com/trezor/trezord-go
     git fetch --all --tags --prune
     git checkout $TREZOR_BRIDGE_VERSION
-    go install .
+    go build
+    cp trezord-go $GOPATH/bin/trezord-go
 fi
