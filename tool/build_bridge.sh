@@ -13,7 +13,7 @@ if [ ! -d $GOPATH/src/github.com/trezor/trezord-go ]; then
     #git checkout bit-wasp/nousb
 
     git remote add origin https://github.com/trezor/trezord-go
-    git fetch origin not_read
-    git checkout not_read
+    git fetch origin master
+    git checkout master
     go install .
 fi
