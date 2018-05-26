@@ -6,13 +6,13 @@ namespace BitWasp\Test\Trezor\Device\UserInput;
 
 use BitWasp\Test\Trezor\TestCase;
 use BitWasp\Trezor\Device\UserInput\CurrentPassphraseInput;
-use BitWasp\Trezor\Device\UserInput\UserInputRequest;
+use BitWasp\Trezor\Device\UserInput\UserInputRequestInterface;
 
 class CurrentPassphraseInputTest extends TestCase
 {
     public function testGetCurrentPin()
     {
-        $userInputMock = $this->getMockForAbstractClass(UserInputRequest::class);
+        $userInputMock = $this->getMockForAbstractClass(UserInputRequestInterface::class);
         $userInputMock->expects($this->once())
             ->method("getInput")
             ->willReturn('my-bip39-passphrase');
