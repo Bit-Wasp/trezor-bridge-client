@@ -30,7 +30,7 @@ class ClientTest extends TestCase
     public function testBridgeVersion()
     {
         $version = $this->client->bridgeVersion();
-        $this->assertEquals("2.0.12", $version->version());
+        $this->assertEquals($this->getTestBridgeVersion(), $version->version());
     }
 
     public function testAcquireAndRelease()

@@ -11,6 +11,6 @@ class SignTxService
     public function call(
         Session $session
     ) {
-        
+
     }
 }
