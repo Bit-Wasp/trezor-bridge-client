@@ -17,13 +17,6 @@ use BitWasp\TrezorProto\PinMatrixRequestType;
 
 abstract class DeviceService
 {
-    protected function checkPinRequestType(PinMatrixRequest $pinRequest, PinMatrixRequestType $requestType)
-    {
-        if ($pinRequest->getType()->value() !== $requestType->value()) {
-            throw new \RuntimeException("Unexpected pin matrix type (was {$pinRequest->getType()->name()}, not expected type {$requestType->name()})");
-        }
-    }
-
     protected function confirmWithButton(ButtonRequest $request, ButtonRequestType $buttonType): Message
     {
         $theirType = $request->getCode();
@@ -36,14 +29,15 @@ abstract class DeviceService
 
     protected function provideCurrentPin(PinMatrixRequest $proto, CurrentPinInputInterface $currentPinInput): Message
     {
-        $this->checkPinRequestType($proto, PinMatrixRequestType::PinMatrixRequestType_Current());
+        if ($proto->getType()->value() !== PinMatrixRequestType::PinMatrixRequestType_Current()->value()) {
+            throw new \RuntimeException("Unexpected pin matrix type (was {$proto->getType()->name()}, not expected type ".PinMatrixRequestType::PinMatrixRequestType_Current()->name().")");
+        }
 
         $pinMatrixAck = new PinMatrixAck();
         $pinMatrixAck->setPin($currentPinInput->getPin());
 
         return Message::pinMatrixAck($pinMatrixAck);
     }
-
 
     protected function provideCurrentPassphrase(CurrentPassphraseInputInterface $passphraseInput): Message
     {

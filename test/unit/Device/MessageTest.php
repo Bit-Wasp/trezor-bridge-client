@@ -12,6 +12,7 @@ use BitWasp\TrezorProto\GetAddress;
 use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
+use BitWasp\TrezorProto\LoadDevice;
 use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PassphraseAck;
 use BitWasp\TrezorProto\Ping;
@@ -107,5 +108,13 @@ class MessageTest extends TestCase
         $msg = Message::verifyMessage($m);
         $this->assertSame($m, $msg->getProto());
         $this->assertEquals(MessageType::MessageType_VerifyMessage()->value(), $msg->getType());
+    }
+
+    public function testLoadDevice()
+    {
+        $m = new LoadDevice();
+        $msg = Message::loadDevice($m);
+        $this->assertSame($m, $msg->getProto());
+        $this->assertEquals(MessageType::MessageType_LoadDevice()->value(), $msg->getType());
     }
 }

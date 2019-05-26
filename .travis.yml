@@ -31,7 +31,7 @@ matrix:
     - php: 7.2
       env: PHPUNIT=true COVERAGE=true CODE_STYLE=true
     - php: 7.2
-      env: INTEGRATION=true
+      env: INTEGRATION=true TREZOR_BRIDGE_VERSION=v2.0.13 COVERAGE=true
 
 install:
  - composer install
@@ -52,5 +52,5 @@ script:
  - BRIDGE_PATH=$GOPATH/bin/trezord-go EMULATOR_PATH=tool/emulator/trezor-mcu/build/trezor-emulator64-master tool/run_integration_tests.sh
  - tool/run_codestyle_tests.sh
 
-after_success:
+after_script:
 - if [ "${COVERAGE}" = "true" ] ; then make scrutinizer; fi

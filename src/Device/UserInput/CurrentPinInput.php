@@ -7,11 +7,11 @@ namespace BitWasp\Trezor\Device\UserInput;
 class CurrentPinInput implements CurrentPinInputInterface
 {
     /**
-     * @var UserInputRequest
+     * @var UserInputRequestInterface
      */
     private $inputRequest;
 
-    public function __construct(UserInputRequest $inputRequest)
+    public function __construct(UserInputRequestInterface $inputRequest)
     {
         $this->inputRequest = $inputRequest;
     }

@@ -8,8 +8,10 @@ use BitWasp\TrezorProto\ClearSession;
 use BitWasp\TrezorProto\GetAddress;
 use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
+use BitWasp\TrezorProto\HDNodeType;
 use BitWasp\TrezorProto\Initialize;
 use BitWasp\TrezorProto\InputScriptType;
+use BitWasp\TrezorProto\LoadDevice;
 use BitWasp\TrezorProto\Ping;
 use BitWasp\TrezorProto\SignMessage;
 use BitWasp\TrezorProto\VerifyMessage;
@@ -110,5 +112,79 @@ class RequestFactory
     public function clearSession(): ClearSession
     {
         return new ClearSession();
+    }
+
+    private function prepareLoadDevice(
+        bool $skipChecksum,
+        bool $usePassphrase,
+        string $language = null,
+        int $u2fCounter = null,
+        string $pin = null,
+        string $label = null
+    ): LoadDevice {
+        $loadDevice = new LoadDevice();
+        $loadDevice->setSkipChecksum($skipChecksum);
+        $loadDevice->setPassphraseProtection($usePassphrase);
+        if (is_string($language)) {
+            $loadDevice->setLanguage($language);
+        }
+        if (is_string($pin)) {
+            $loadDevice->setPin($pin);
+        }
+        if (is_string($label)) {
+            $loadDevice->setLabel($label);
+        }
+        if (is_int($u2fCounter)) {
+            $loadDevice->setU2fCounter($u2fCounter);
+        }
+        return $loadDevice;
+    }
+
+    public function loadDeviceWithHdNode(
+        HDNodeType $hdNode,
+        string $language,
+        string $label = null,
+        string $pin = null,
+        bool $usePassphrase = false,
+        bool $skipChecksum = false,
+        int $u2fCounter = null
+    ): LoadDevice {
+        $loadDevice = $this->prepareLoadDevice($skipChecksum, $usePassphrase, $language, $u2fCounter, $pin, $label);
+        $loadDevice->setNode($hdNode);
+        return $loadDevice;
+    }
+
+    public function loadDeviceWithMnemonic(
+        string $mnemonic,
+        string $language = null,
+        string $label = null,
+        string $pin = null,
+        bool $usePassphrase = false,
+        bool $skipChecksum = false,
+        int $u2fCounter = null
+    ): LoadDevice {
+        $loadDevice = $this->prepareLoadDevice($skipChecksum, $usePassphrase, $language, $u2fCounter, $pin, $label);
+        $loadDevice->setMnemonic($mnemonic);
+        return $loadDevice;
+    }
+    public function privateHdNode(int $depth, int $fingerprint, int $childNum, \Protobuf\Stream $chainCode, \Protobuf\Stream $privateKey): HDNodeType
+    {
+        $hdNode = new HDNodeType();
+        $hdNode->setDepth($depth);
+        $hdNode->setFingerprint($fingerprint);
+        $hdNode->setChildNum($childNum);
+        $hdNode->setChainCode($chainCode);
+        $hdNode->setPrivateKey($privateKey);
+        return $hdNode;
+    }
+    public function publicHdNode(int $depth, int $fingerprint, int $childNum, \Protobuf\Stream $chainCode, \Protobuf\Stream $publicKey): HDNodeType
+    {
+        $hdNode = new HDNodeType();
+        $hdNode->setDepth($depth);
+        $hdNode->setFingerprint($fingerprint);
+        $hdNode->setChildNum($childNum);
+        $hdNode->setChainCode($chainCode);
+        $hdNode->setPublicKey($publicKey);
+        return $hdNode;
     }
 }

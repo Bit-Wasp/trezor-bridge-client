@@ -7,8 +7,10 @@ namespace BitWasp\Trezor\Bridge\Http;
 use BitWasp\Trezor\Bridge\Codec\CallMessage;
 use BitWasp\Trezor\Bridge\Message\Device;
 use BitWasp\Trezor\Device\Message;
+use BitWasp\Trezor\Device\MessageBase;
 use BitWasp\TrezorProto\MessageType;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpClient
@@ -100,25 +102,50 @@ class HttpClient
         ]);
     }
 
-    public function call(string $sessionId, Message $message): Message
+    public function post(string $sessionId, MessageBase $message)
+    {
+        $responsePromise = $this->postAsync($sessionId, $message);
+        return $responsePromise->wait(true);
+    }
+
+    public function call(string $sessionId, MessageBase $message): Message
+    {
+        $responsePromise = $this->callAsync($sessionId, $message);
+        return $responsePromise->wait(true);
+    }
+
+    public function postAsync(string $sessionId, MessageBase $message)
     {
         static $prefixLen;
         if (null === $prefixLen) {
             $prefixLen = strlen("MessageType_");
         }
 
-        $response = $this->client->post("/call/{$sessionId}", [
+        return $this->client->postAsync("/post/{$sessionId}", [
             'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
         ]);
+    }
 
-        list ($type, $result) = $this->callCodec->parsePayload($response->getBody());
+    public function callAsync(string $sessionId, MessageBase $message)
+    {
+        static $prefixLen;
+        if (null === $prefixLen) {
+            $prefixLen = strlen("MessageType_");
+        }
 
-        $messageType = MessageType::valueOf($type);
-        $protoType = substr($messageType->name(), $prefixLen);
-        $reader = ["\\BitWasp\\TrezorProto\\{$protoType}", 'fromStream'];
-        assert(class_exists($reader[0]));
+        return $this->client->postAsync("/call/{$sessionId}", [
+            'body' => $this->callCodec->encode($message->getType(), $message->getProto()),
+        ])
+            ->then(function (Response $response) use ($prefixLen): Message {
+                list ($type, $result) = $this->callCodec->parsePayload($response->getBody());
 
-        $protobuf = call_user_func($reader, $result);
-        return new Message($messageType, $protobuf);
+                $messageType = MessageType::valueOf($type);
+                $protoType = substr($messageType->name(), $prefixLen);
+                $reader = ["\\BitWasp\\TrezorProto\\{$protoType}", 'fromStream'];
+                assert(class_exists($reader[0]));
+
+                $protobuf = call_user_func($reader, $result);
+                return new Message($messageType, $protobuf);
+            });
     }
 }

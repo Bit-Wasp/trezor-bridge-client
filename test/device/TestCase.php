@@ -18,9 +18,22 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     private $bridge;
 
+    public function getTestBridgeVersion(): string
+    {
+        if (!($ver = getenv('TREZOR_BRIDGE_VERSION'))) {
+            throw new \RuntimeException("Missing TREZOR_BRIDGE_VERSION");
+        }
+        return substr($ver, 1);
+    }
+
     public function getRootPath(): string
     {
         return __DIR__ . "/../../";
+    }
+
+    public function getStateFile(): string
+    {
+        return "{$this->getRootPath()}/emulator.img";
     }
 
     public function getEmulatorPath(): string
@@ -35,14 +48,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     public function getEmulatorStartCommand(): string
     {
         return $this->getEmulatorPath() .
-        /* . " > /dev/null"  . */
         " > 1 & echo $! ; ";
     }
     public function getBridgeStartCommand(): string
     {
         return $this->getBridgePath() .
-            /* . " > /dev/null"  . */
-            " -u=false -e 21324 -l /tmp/trezor-bridge > 1 & echo $! ; ";
+            " -u=false -e 21324 -e 21325 -l /tmp/trezor-bridge > 1 & echo $! ; ";
     }
     public function getBridgePath(): string
     {
@@ -73,5 +84,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     {
         exec("kill -9 {$this->emu}");
         exec("kill -9 {$this->bridge}");
+        unlink($this->getStateFile());
     }
 }

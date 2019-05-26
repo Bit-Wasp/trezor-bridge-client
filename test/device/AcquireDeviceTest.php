@@ -19,9 +19,13 @@ class AcquireDeviceTest extends TestCase
         $httpClient = HttpClient::forUri("http://localhost:21325");
         $client = new Client($httpClient);
         $devices = $client->listDevices();
-        $this->assertCount(1, $devices);
+
+        $this->assertCount(2, $devices);
         $this->assertEquals("emulator21324", $devices->devices()[0]->getPath());
         $this->assertEquals(null, $devices->devices()[0]->getSession());
+
+        $this->assertEquals("emulator21325", $devices->devices()[1]->getPath());
+        $this->assertEquals(null, $devices->devices()[01]->getSession());
 
         $session = $client->acquire($devices->devices()[0]);
 
@@ -33,14 +37,14 @@ class AcquireDeviceTest extends TestCase
         $this->assertEquals('abc', $result->getMessage());
 
         $devices = $client->listDevices();
-        $this->assertCount(1, $devices);
+        $this->assertCount(2, $devices);
         $this->assertEquals("emulator21324", $devices->devices()[0]->getPath());
         $this->assertEquals($session->getSessionId(), $devices->devices()[0]->getSession());
 
         $session->release();
 
         $devices = $client->listDevices();
-        $this->assertCount(1, $devices);
+        $this->assertCount(2, $devices);
         $this->assertEquals("emulator21324", $devices->devices()[0]->getPath());
         $this->assertEquals(null, $devices->devices()[0]->getSession());
     }

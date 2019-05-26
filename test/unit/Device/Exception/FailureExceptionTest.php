@@ -17,6 +17,7 @@ class FailureExceptionTest extends TestCase
         $failure = new Failure($stream);
 
         $this->expectException(UnknownError::class);
+        $this->expectExceptionCode(0);
         FailureException::handleFailure($failure);
     }
 }

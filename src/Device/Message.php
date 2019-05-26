@@ -10,6 +10,7 @@ use BitWasp\TrezorProto\GetAddress;
 use BitWasp\TrezorProto\GetEntropy;
 use BitWasp\TrezorProto\GetPublicKey;
 use BitWasp\TrezorProto\Initialize;
+use BitWasp\TrezorProto\LoadDevice;
 use BitWasp\TrezorProto\MessageType;
 use BitWasp\TrezorProto\PassphraseAck;
 use BitWasp\TrezorProto\Ping;
@@ -17,34 +18,8 @@ use BitWasp\TrezorProto\PinMatrixAck;
 use BitWasp\TrezorProto\SignMessage;
 use BitWasp\TrezorProto\VerifyMessage;
 
-class Message
+class Message extends MessageBase
 {
-    /**
-     * @var MessageType
-     */
-    private $type;
-
-    /**
-     * @var \Protobuf\Message
-     */
-    private $proto;
-
-    public function __construct(MessageType $messageType, \Protobuf\Message $protobuf)
-    {
-        $this->type = $messageType;
-        $this->proto = $protobuf;
-    }
-
-    public function getType(): int
-    {
-        return $this->type->value();
-    }
-
-    public function getProto(): \Protobuf\Message
-    {
-        return $this->proto;
-    }
-
     public static function getPublicKey(GetPublicKey $getPublicKey): self
     {
         return new self(
@@ -129,6 +104,14 @@ class Message
     {
         return new self(
             MessageType::MessageType_ClearSession(),
+            $clear
+        );
+    }
+
+    public static function loadDevice(LoadDevice $clear): self
+    {
+        return new self(
+            MessageType::MessageType_LoadDevice(),
             $clear
         );
     }

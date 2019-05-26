@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace BitWasp\Test\Trezor\Device\Device\Command;
 
-use BitWasp\Test\Trezor\Device\Device\CommandTest;
 use BitWasp\Trezor\Device\Command\InitializeService;
 use BitWasp\TrezorProto\Features;
 use BitWasp\TrezorProto\Initialize;
